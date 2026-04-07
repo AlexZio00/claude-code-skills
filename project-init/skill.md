@@ -180,7 +180,12 @@ Generate at project root using this structure:
 # [Project Name] v1.0
 
 ## Hard Rules (never bend)
-- [from Q7 + additional recommendations]
+{Conditional — check before generating:
+  `.claude/rules/ai-constitution.md` exists →
+    Hard Rules → see [.claude/rules/ai-constitution.md](.claude/rules/ai-constitution.md)
+  Does NOT exist →
+    - [each rule from Q7 + domain defaults, listed directly]
+}
 
 ## Quick Ref
 - Entry: [auto-filled from Q2: Python→`python {main}.py`, TS→`npx ts-node src/index.ts`, Go→`go run cmd/{app}/main.go`, Rust→`cargo run`, Java→`./gradlew bootRun`]
@@ -330,23 +335,6 @@ DerivedData/
 
 ---
 
-### 3-5b. Swift .env.example
-
-Generate for Swift projects (same as other languages — Swift apps also call APIs):
-
-```bash
-# === API Keys ===
-# API_KEY=
-
-# === Feature Flags (default OFF) ===
-# FEATURE_NAME_ENABLED=0
-
-# === App Config ===
-# BASE_URL=https://api.example.com
-```
-
----
-
 ### 3-4. .env.example
 
 Generate based on what was decided in Q6 (AI/LLM) and Q3 (data layer):
@@ -373,9 +361,22 @@ Generate based on what was decided in Q6 (AI/LLM) and Q3 (data layer):
 Only include sections relevant to the project's decided stack.
 Leave all values empty — this file is a template, never a config.
 
+**Swift projects:** same structure — include only sections relevant to your app's API dependencies:
+
+```bash
+# === API Keys ===
+# API_KEY=
+
+# === Feature Flags (default OFF) ===
+# FEATURE_NAME_ENABLED=0
+
+# === App Config ===
+# BASE_URL=https://api.example.com
+```
+
 ---
 
-### 3-5. Folder Structure
+### 3-5. Folder Structure (reference only — not generated)
 
 Auto-select based on language. Combine for multi-language projects.
 
@@ -582,11 +583,11 @@ AI 에이전트/rules/hooks 설정 → `/harness-init` 사용.
 ```
 □ Language / runtime decided
 □ Data layer decided
-□ At least 1 hard rule defined
-□ Hard Rules present in CLAUDE.md
+□ Hard Rules present in CLAUDE.md (direct or ai-constitution.md reference)
 □ Secrets policy included
 □ .gitignore generated
 □ .env.example generated (if secrets/API keys involved)
+□ If Hard Rules reference a specific service/API, matching placeholder exists in .env.example
 □ ROADMAP structured by phases (not flat task list)
 □ Test strategy mentioned
 ```

@@ -32,7 +32,10 @@ Check each target file before generating:
 ```
 1. Read existing settings.json
 2. For each hook type (SessionStart, PreCompact, Stop):
-   - If key exists: append new hook object to the existing array
+   - If key exists:
+     - Check each existing hook's command string
+     - If exact command string already present: skip (no duplicate)
+     - If new command: append new hook object to the array
    - If key doesn't exist: create with new hook object
 3. Write merged result back
 ```
@@ -41,6 +44,15 @@ Never replace the entire hooks object. Never delete existing hook entries.
 Check if `CLAUDE.md` exists in the project root.
 - If yes → read it for context (Hard Rules, stack, conventions)
 - If no → recommend running `/project-init` first, but don't block
+
+**Hard Rules conflict check** (if both `CLAUDE.md` and `~/.claude/rules/ai-constitution.md` exist):
+1. Extract Hard Rules from CLAUDE.md
+2. Compare with Tier-0 rules in ai-constitution.md
+3. If divergent:
+   - Rules in CLAUDE.md not in ai-constitution.md → propose adding them to ai-constitution.md
+   - Rules in CLAUDE.md weaker than ai-constitution.md → flag: "CLAUDE.md has a weaker version, remove it"
+4. If identical or CLAUDE.md just has a reference link → no action needed
+5. Recommended outcome: CLAUDE.md contains only `Hard Rules → see [.claude/rules/ai-constitution.md](.claude/rules/ai-constitution.md)`, actual rules live only in ai-constitution.md
 
 Check if `~/.claude/` global structure exists.
 - Read existing rules to detect conflicts before generating.
@@ -100,25 +112,29 @@ Which review steps before code ships?
 Start with Basic if unsure. Add more after your first production incident.
 ```
 
-**Orchestrated version:**
-```
-Let's design your review pipeline. For each gate, tell me:
-- When does it trigger? (every commit? before push? before merge?)
-- What should it catch? (bugs? secrets? architecture violations?)
-- What blocks shipping vs. what's advisory?
+**Orchestrated version (two questions):**
 
-Available gates:
+*Q3a — Gate selection:*
+```
+Which review gates do you want? (check all that apply)
+
   code-reviewer — finds issues, severity scoring, never fixes directly
   security-reviewer — secrets exposure, injection, OWASP Top 10
   verification — mandatory checklist before declaring "done"
   build-error-resolver — fixes build/type errors only, no refactoring
   database-reviewer — SQL injection, missing indexes, N+1 queries
+```
 
-Which do you want, and what should each one do for YOUR project?
+*Q3b — Per-gate config (ask separately for each selected gate):*
+```
+For [gate-name]:
+- When does it trigger? (every commit? before push? before merge?)
+- What should it catch specifically for your project?
+- Blocking (nothing ships until fixed) or advisory (flag and continue)?
 ```
 
 **Agent existence check (before generating agents.md):**
-Scan `~/.claude/agents/` for each selected agent. If any are missing:
+Scan BOTH `~/.claude/agents/` (global) AND `.claude/agents/` (project-level) for each selected agent. If missing in both:
 ```
 "[agent-name] 에이전트 파일이 ~/.claude/agents/에 없습니다.
 agents.md에 라우팅만 등록하면 동작하지 않습니다.
@@ -276,8 +292,9 @@ memory: structured
 tier_0_immutable:
   - "no fabrication: if data is missing, say so — never generate fake values"
   - "no hardcoded secrets: credentials via environment variables only"
-  - "no raw SQL: parameterized queries or ORM only"
   - "input validation: validate at every system boundary (user input, external APIs)"
+  # Only include if Q3 selected a database:
+  # - "no raw SQL: parameterized queries or ORM only"
 
 tier_1_mandatory:
   - "verification after every code change"
@@ -446,8 +463,12 @@ Generate actual working commands, not placeholders:
 ```
 memory/
 ├── MEMORY.md                      # project knowledge base
-└── session-handoff-LATEST.md      # inter-session state (single file, no versions)
+├── session-handoff-LATEST.md      # inter-session state (always current)
+└── session-handoff-YYYY-MM-DD.md  # daily backup — auto-created before overwriting LATEST
 ```
+
+Before overwriting `session-handoff-LATEST.md`: copy current file to `session-handoff-{YYYY-MM-DD}.md`.
+Preserves last known state in case of mid-session context loss.
 
 Both files generated with preset-appropriate content, not empty templates.
 
@@ -502,7 +523,7 @@ Respond following the harness rules exactly."
 ```
 
 - subagent_type: "general-purpose"
-- model: "haiku"
+- model: "haiku" (if unavailable → "sonnet"; last resort → same model, two independent runs)
 - Run all scenarios in parallel
 
 For each response:

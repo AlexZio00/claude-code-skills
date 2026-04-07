@@ -94,6 +94,8 @@ New project idea
 
 Run `/project-init` first to establish the project foundation, then `/harness-init` to layer on the AI orchestration.
 
+> **Standalone use:** `/harness-init` works without `/project-init` — it will write Hard Rules directly into `ai-constitution.md`. If you later run `/project-init`, the generated `CLAUDE.md` will check for `ai-constitution.md` and insert a reference link instead of duplicating rules. But if you run them in reverse order, manually remove the Hard Rules section from `CLAUDE.md` and replace with a reference link.
+
 ---
 
 ## Principles Embedded
