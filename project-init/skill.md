@@ -207,7 +207,133 @@ Preserve on compaction:
 - [ ] [Future items]
 ```
 
-### 3-3. Folder Structure
+### 3-3. .gitignore
+
+Generate at project root based on language:
+
+**Python:**
+```gitignore
+# Environment
+.env
+.env.local
+venv/
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Outputs & artifacts
+outputs/
+*.log
+*.jsonl
+
+# IDE
+.vscode/
+.idea/
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+.mypy_cache/
+```
+
+**TypeScript / JavaScript:**
+```gitignore
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Dependencies
+node_modules/
+
+# Build
+.next/
+dist/
+build/
+out/
+
+# Logs
+*.log
+npm-debug.log*
+
+# IDE
+.vscode/
+.idea/
+```
+
+**Go:**
+```gitignore
+.env
+*.exe
+*.exe~
+*.test
+*.out
+vendor/
+```
+
+**Rust:**
+```gitignore
+.env
+/target/
+Cargo.lock   # remove this line if publishing a library
+```
+
+**Java / Kotlin:**
+```gitignore
+.env
+.gradle/
+build/
+out/
+*.class
+*.jar
+.idea/
+*.iml
+local.properties
+```
+
+**Swift:**
+```gitignore
+.env
+.build/
+*.xcworkspace/xcuserdata/
+DerivedData/
+*.ipa
+*.dSYM.zip
+```
+
+---
+
+### 3-4. .env.example
+
+Generate based on what was decided in Q6 (AI/LLM) and Q3 (data layer):
+
+```bash
+# === API Keys ===
+# OPENAI_API_KEY=
+# ANTHROPIC_API_KEY=
+# OPENROUTER_API_KEY=
+
+# === Database ===
+# DATABASE_URL=sqlite:///app.db
+# POSTGRES_URL=
+
+# === Feature Flags (default OFF) ===
+# LLM_ENABLED=0
+# [FEATURE_NAME]_ENABLED=0
+
+# === App Config ===
+# LOG_LEVEL=INFO
+# PORT=8000
+```
+
+Only include sections relevant to the project's decided stack.
+Leave all values empty — this file is a template, never a config.
+
+---
+
+### 3-5. Folder Structure
 
 Auto-select based on language. Combine for multi-language projects.
 
@@ -390,6 +516,8 @@ Approve → files confirmed
 □ At least 1 hard rule defined
 □ Hard Rules present in CLAUDE.md
 □ Secrets policy included
+□ .gitignore generated
+□ .env.example generated (if secrets/API keys involved)
 □ ROADMAP structured by phases (not flat task list)
 □ Test strategy mentioned
 ```
