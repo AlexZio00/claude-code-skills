@@ -1,6 +1,6 @@
 # claude-code-skills
 
-A collection of practical Claude Code skills built from real production experience.
+Set up your project, then set up your AI. Two skills, zero guesswork.
 
 ## Skills
 
