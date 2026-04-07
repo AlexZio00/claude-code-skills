@@ -380,6 +380,14 @@ Files to generate: [count with list]
 Each rule above is valid UNLESS:
 - [conditions under which rules should be reconsidered]
 - User explicitly overrides with documented reasoning
+
+## VI. Memory Discipline
+1. Memory is a hint, not a fact.
+   MEMORY.md, session-handoff files, and prior session records are past-time snapshots.
+   Verify current state before acting.
+2. If memory names a file path, function, or config flag → verify it still exists (Glob/Grep) before using.
+3. If memory conflicts with current state → current state wins. Update stale memory immediately.
+4. "It's in memory so it must be right" is a reasoning error. Memory is a starting point for verification, not a substitute for it.
 ```
 
 **agents.md** — only if complexity >= Standard:
@@ -405,6 +413,24 @@ Tier 3: [quality gates]
 Tier 4: [style]
 
 Higher tier always wins. Same-tier conflicts → more conservative option.
+
+## Voice Guidelines
+
+**Agent → User:**
+- Result first, explanation second (conclusion → rationale → next steps)
+- If uncertain, state "unknown" — no guessing
+- Code blocks show changed parts only (no full-file output)
+
+**Agent → Agent (subagent dispatch):**
+- Include full context in the prompt (no delegating file reads)
+- Use absolute paths only
+- Return status: DONE | DONE_WITH_CONCERNS | NEEDS_CONTEXT | BLOCKED
+- **Return compression rule**: compressed summary + status code only. Never return raw output, full file contents, or verbose execution logs. Deep search results → key findings only.
+
+**Prohibited patterns:**
+- Sycophantic openers ("Great question!", "Of course!")
+- Closing filler ("Hope this helps", "Let me know if...")
+- Excessive emojis
 ```
 
 **output-style.md** — from Q5 style preferences:
@@ -419,6 +445,11 @@ Higher tier always wins. Same-tier conflicts → more conservative option.
 
 ```markdown
 # Development Workflow
+
+## Context Efficiency _(always apply)_
+- **JIT reading**: Read only the specific function/section being modified. Load entire files only when full structure is needed.
+- **Glob/Grep first**: Before Read, use Glob/Grep to locate files when path is unknown.
+- **Subagent return compression**: Deep search results → summary only. Never pass raw output up.
 
 ## Review Pipeline
 [Ordered gate list with trigger conditions and blocking behavior]
