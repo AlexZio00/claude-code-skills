@@ -33,6 +33,24 @@ Check if `CLAUDE.md` exists in the current working directory.
 If the user provides a file path or pastes a project brief, read it first.
 Extract any stack decisions or constraints to pre-fill interview answers.
 
+### 0-3. Smart Defaults
+
+After Phase 0, check for context clues before asking each Q.
+
+For each Q where a likely answer is detectable:
+→ Present as binary confirm: `[likely answer] — 맞나요? (Y/n)`
+→ **Y**: accept and move to next Q immediately
+→ **N**: ask the full open-ended question
+
+If no context available → ask all questions open-ended as normal.
+
+**Default signals by Q:**
+- Q2 (Language): file extensions in directory — `.py` → Python, `.ts`/`.tsx` → TypeScript, `go.mod` → Go, `Cargo.toml` → Rust
+- Q3 (Data): "database", "DB", "sqlite", "postgres" in brief → suggest SQLite first
+- Q4 (Interface): "dashboard", "web", "UI" in brief → suggest Web; "script", "automation", "CLI" → suggest CLI
+- Q6 (AI): no LLM mentions found → `"지금은 None, 나중에 추가 — 맞나요? (Y/n)"`
+- Q8 (Scope): default to "1 month+, solo" unless team or deadline mentioned
+
 ---
 
 ## Phase 1: Interview (one question at a time)

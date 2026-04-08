@@ -332,7 +332,18 @@ Tier 1+ Rules:
 Custom additions:
 - [from Q5]
 
-Files to generate: [count with list]
+Execution Plan:
+| Step | File | Operation | Requires |
+|------|------|-----------|---------|
+| 1 | `~/.claude/rules/ai-constitution.md` | Create / Extend | — |
+| 2 | `~/.claude/rules/agents.md` | Create (Standard+) | Step 1 |
+| 3 | `~/.claude/rules/output-style.md` | Create / Update | — |
+| 4 | `~/.claude/rules/development-workflow.md` | Create (review gates) | Step 2 |
+| 5 | `~/.claude/settings.json` | Merge hooks | — |
+| 6 | `memory/MEMORY.md` | Create | — |
+| 7 | `memory/session-handoff-LATEST.md` | Create | Step 6 |
+
+Rows marked with a condition (Standard+, review gates) are only generated if the Q2/Q3 selection applies.
 ```
 
 **Wait for explicit approval before generating.**
