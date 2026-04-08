@@ -2,6 +2,10 @@
 
 Set up your project, then set up your AI. Two skills, zero guesswork.
 
+> **Scope:** Project scaffolding + AI harness setup — the foundation layer.
+> NOT team orchestration (planner/reviewer/implementer agents).
+> These run before your agent team, not instead of it.
+
 ## Skills
 
 ### `/project-init` — New Project Setup Interview
@@ -89,10 +93,12 @@ New project idea
   │
   ├─ /project-init     → CLAUDE.md + ROADMAP + .gitignore + .env.example
   │
-  └─ /harness-init     → rules/ + hooks + memory/ + agent routing
+  ├─ /harness-init     → rules/ + hooks + memory/ + agent routing
+  │
+  └─ (your team agents: planner, reviewer, implementer, ...)
 ```
 
-Run `/project-init` first to establish the project foundation, then `/harness-init` to layer on the AI orchestration.
+Run `/project-init` first to establish the project foundation, then `/harness-init` to layer on the AI orchestration. After that, add your own team agents — brainstorming, code-reviewer, subagent-dev, etc. These two skills are the start of that stack, not the whole thing.
 
 > **Standalone use:** `/harness-init` works without `/project-init` — it will write Hard Rules directly into `ai-constitution.md`. If you later run `/project-init`, the generated `CLAUDE.md` will check for `ai-constitution.md` and insert a reference link instead of duplicating rules. But if you run them in reverse order, manually remove the Hard Rules section from `CLAUDE.md` and replace with a reference link.
 
