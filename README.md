@@ -109,21 +109,6 @@ for %d in (project-init harness-init team-init) do (
 )
 ```
 
-Copy the skill folders into your Claude Code skills directory:
-
-```bash
-# macOS / Linux
-mkdir -p ~/.claude/skills/project-init ~/.claude/skills/harness-init
-cp project-init/skill.md ~/.claude/skills/project-init/skill.md
-cp harness-init/skill.md ~/.claude/skills/harness-init/skill.md
-
-# Windows
-mkdir "%USERPROFILE%\.claude\skills\project-init"
-mkdir "%USERPROFILE%\.claude\skills\harness-init"
-copy project-init\skill.md "%USERPROFILE%\.claude\skills\project-init\skill.md"
-copy harness-init\skill.md "%USERPROFILE%\.claude\skills\harness-init\skill.md"
-```
-
 Then invoke in any Claude Code session:
 
 ```
