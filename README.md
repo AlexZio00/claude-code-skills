@@ -1,9 +1,9 @@
-# claude-code-skills v3.1
+# claude-code-skills v3.2
 
-Audit what's broken. Scaffold what's missing. Wire the AI. Assemble the team.
+Audit what's broken. Scaffold what's missing. Wire the AI. Assemble the team. Ship with confidence.
 
-> **Scope:** The full setup pipeline for Claude Code projects — from health check to working agent team.
-> Four skills that build on each other. Each one is useful standalone; the full sequence gives you the most coherent setup.
+> **Scope:** The full lifecycle pipeline for Claude Code projects — from health check to daily push gate.
+> Five skills that build on each other. Each one is useful standalone; the full sequence covers setup to daily workflow.
 
 ---
 
@@ -111,32 +111,81 @@ The orchestrator's correction loop catches implementation drift automatically �
 
 ---
 
-## Installation
+### `/pre-push` — Pre-Push Quality Gate
 
-Copy the skill folders into your Claude Code skills directory:
+Mandatory pipeline that runs automatically before every `git push`. Blocks on secrets, test failures, and lint errors. Surfaces code review findings before they land in the remote.
+
+**What it does (8 steps):**
+
+1. **Secrets scan** — runs `scan_secrets.pl` against staged diff only. Covers 12 patterns: AWS/GCP/Azure keys, private keys, connection string passwords, hardcoded credential assignments (quoted + unquoted YAML), platform tokens (GitHub 6 types, Slack, Stripe live), Dockerfile ENV secrets, Google/Gemini API keys, npm auth tokens, LLM provider keys (Anthropic/OpenAI/HuggingFace/Replicate/Groq), Azure Storage/SAS. Scans only `+` lines — never blocks a commit that *removes* a secret.
+
+2. **Routing & remediation** — secrets found → BLOCK with per-pattern remediation instructions. Only `*.md` / `docs/**` changed → fast exit, skip remaining steps.
+
+3. **Supply chain check** — lists all added dependencies from `package.json`, `requirements.txt`, `go.mod`, `Cargo.toml`, etc. Flags misspelled or unfamiliar package names as potential typosquats. Never blocks — warns only.
+
+4. **Build & test** — language-aware, runs only what changed:
+   - Python (`.py` changed + `pyproject.toml`/`setup.py`/`requirements.txt` present): `pytest -q`
+   - Go (`.go` changed + `go.mod` present): `go test ./...`
+   - JS/TS (`.ts`/`.tsx`/`.js`/`.jsx` changed + `package.json`): `npm run build` then `npm test`
+
+5. **Lint gate** — direct lint first, AI lint second:
+   - Python: `ruff check` (preferred) → `flake8` fallback
+   - Go: `go vet ./...`
+   - JS/TS: `eslint` (if config file present)
+   - Then **quick-validator** (haiku) for type errors and logical issues static tools miss — skipped if diff < 50 lines
+
+6. **Parallel AI review** — spawns applicable agents in one turn:
+   - `code-reviewer` (sonnet) — always
+   - `security-reviewer` (opus) — triggered by auth files, API routes, infra, dangerous patterns (`eval`, `exec`, `child_process`, `dangerouslySetInnerHTML`), or new packages
+   - `database-reviewer` (sonnet) — triggered by migrations, SQL, `prisma/**`
+   - `refactor-cleaner` (sonnet) — triggered when 10+ files changed
+
+7. **Gate check** — Critical/High findings block push. Medium: fix if < 5 min or add `// TODO(security):`. Low: report only.
+
+8. **Report & push** — structured summary with elapsed time per step. Executes `git push` only when all gates pass.
+
+**Extra safeguards:**
+- Pushes to `main`/`master` require explicit confirmation
+- Test files (`__tests__/**`, `*.test.*`, `*.spec.*`) — secret findings downgraded to Medium
+- Emergency override: user says "skip review" → pipeline bypassed with warning printed
+
+**Installation note:** `scripts/scan_secrets.pl` must be co-located with `SKILL.md`. The scanner is called via `find ~/.claude -name "scan_secrets.pl"` so it works regardless of where you install the skill.
+
+---
+
+## Installation
 
 ```bash
 # macOS / Linux
-mkdir -p ~/.claude/skills/{project-check,project-init,harness-init,team-init}
-cp project-check/SKILL.md ~/.claude/skills/project-check/SKILL.md
-cp project-init/SKILL.md ~/.claude/skills/project-init/SKILL.md
-cp harness-init/SKILL.md ~/.claude/skills/harness-init/SKILL.md
-cp team-init/SKILL.md ~/.claude/skills/team-init/SKILL.md
+SKILLS_DIR=~/.claude/skills
 
-# Windows
-for %d in (project-check project-init harness-init team-init) do (
-  mkdir "%USERPROFILE%\.claude\skills\%d" 2>nul
-  copy %d\SKILL.md "%USERPROFILE%\.claude\skills\%d\SKILL.md"
-)
+mkdir -p $SKILLS_DIR/{project-check,project-init,harness-init,team-init,pre-push/scripts}
+
+cp project-check/SKILL.md   $SKILLS_DIR/project-check/SKILL.md
+cp project-init/SKILL.md    $SKILLS_DIR/project-init/SKILL.md
+cp harness-init/SKILL.md    $SKILLS_DIR/harness-init/SKILL.md
+cp team-init/SKILL.md       $SKILLS_DIR/team-init/SKILL.md
+cp pre-push/SKILL.md        $SKILLS_DIR/pre-push/SKILL.md
+cp pre-push/scripts/scan_secrets.pl $SKILLS_DIR/pre-push/scripts/scan_secrets.pl
 ```
 
-Then invoke in any Claude Code session:
+```bat
+:: Windows
+set SKILLS=%USERPROFILE%\.claude\skills
+for %d in (project-check project-init harness-init team-init pre-push) do mkdir "%SKILLS%\%d" 2>nul
+for %d in (project-check project-init harness-init team-init pre-push) do copy %d\SKILL.md "%SKILLS%\%d\SKILL.md"
+mkdir "%SKILLS%\pre-push\scripts" 2>nul
+copy pre-push\scripts\scan_secrets.pl "%SKILLS%\pre-push\scripts\scan_secrets.pl"
+```
+
+Invoke in any Claude Code session:
 
 ```
-/project-check      # audit an existing project (read-only)
-/project-init       # scaffold a new project
-/harness-init       # set up Claude Code agent infrastructure
-/team-init          # assemble your coding agent team
+/project-check    # audit an existing project (read-only)
+/project-init     # scaffold a new project
+/harness-init     # set up Claude Code agent infrastructure
+/team-init        # assemble your coding agent team
+/pre-push         # run before git push (also triggers automatically on push requests)
 ```
 
 ---
@@ -148,6 +197,7 @@ Then invoke in any Claude Code session:
 /project-check → Score N/10 + gap list
   ├─ gaps found → /project-init (Update mode) + /harness-init + /team-init
   └─ score ≥ 8  → only fix the ⚠ items
+then: use /pre-push on every git push going forward
 ```
 
 **New project — start here:**
@@ -156,15 +206,20 @@ Then invoke in any Claude Code session:
 /harness-init    → rules/ + hooks + memory/ + agent routing
 /team-init       → orchestrator + code-reviewer + verification + ...
 /project-check   → verify everything landed correctly
+/pre-push        → active on every subsequent push
 ```
 
-Run them in order. Each builds on the previous:
-- `/project-init` establishes the project foundation
-- `/harness-init` layers on the AI rules and infrastructure
-- `/team-init` assembles the agent team that operates within those rules
-- `/project-check` audits the result — or diagnoses an existing project before you start
+The five skills map to the full project lifecycle:
 
-> **Standalone use:** Each skill works independently. `/harness-init` works without `/project-init` — it will write Hard Rules directly into `ai-constitution.md`. If you later run `/project-init`, the generated `CLAUDE.md` will check for `ai-constitution.md` and insert a reference link instead of duplicating rules.
+| Phase | Skill | Frequency |
+|-------|-------|-----------|
+| Diagnose | `/project-check` | On-demand |
+| Bootstrap | `/project-init` | Once |
+| Wire AI | `/harness-init` | Once |
+| Build team | `/team-init` | Once |
+| **Ship daily** | **`/pre-push`** | **Every push** |
+
+> **Standalone use:** Each skill works independently. `/pre-push` works on any project — it auto-detects the language and only runs relevant checks.
 
 ---
 
@@ -188,6 +243,8 @@ These came from painful experience on a large production system:
 - **Feature flags default OFF** — unfinished features affecting default behavior makes debugging painful
 - **Merge, never overwrite** — destroying existing settings.json configs is catastrophic
 - **Tier 0 rules are immutable** — no agent or skill can override them
+- **Scan added lines only** — blocking a commit that removes a secret is counterproductive
+- **Direct lint before AI lint** — static tools are deterministic and free; save AI tokens for what grep can't catch
 
 ---
 
@@ -197,6 +254,7 @@ These came from painful experience on a large production system:
 - [x] `/project-init` — project scaffolding
 - [x] `/harness-init` — agent infrastructure setup
 - [x] `/team-init` — agent team assembly
+- [x] `/pre-push` — pre-push quality gate (secrets + tests + lint + AI review)
 
 ---
 
