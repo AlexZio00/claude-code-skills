@@ -21,7 +21,7 @@ Scan an existing project against setup best practices across 4 dimensions: Infra
 Count source files to calibrate warning thresholds:
 
 ```
-Scan: *.py, *.ts, *.tsx, *.js, *.go, *.rs, *.java, *.kt, *.swift
+Scan: *.py, *.ts, *.tsx, *.js, *.go, *.rs, *.java, *.kt, *.swift, *.c, *.cpp, *.h
 ```
 
 Classify:
@@ -49,7 +49,8 @@ Grep these patterns across all source files (case-insensitive). Exclude: `*.exam
 
 ```
 API_KEY\s*=\s*["'][^$({]      → hardcoded API key
-sk-[A-Za-z0-9]{20,}           → OpenAI / Anthropic key
+sk-[A-Za-z0-9]{20,}           → OpenAI key (sk-...)
+sk-ant-[A-Za-z0-9\-]{20,}     → Anthropic key (sk-ant-api03-...)
 ghp_[A-Za-z0-9]{36}           → GitHub PAT
 password\s*=\s*["'][^$({]     → hardcoded password
 secret\s*=\s*["'][^$({]       → hardcoded secret
@@ -96,11 +97,13 @@ Check Claude Code infrastructure:
 | `~/.claude/rules/agents.md` | Exists? | ⚠ if missing |
 | `.claude/settings.json` or `~/.claude/settings.json` | hooks section present? | ⚠ if no hooks |
 | CLAUDE.md Hard Rules format | Inline text vs ai-constitution.md reference link | ⚠ if both (duplication) |
-| `~/.claude/agents/` | Any .md agent files installed? | ⚠ if empty |
+| `~/.claude/agents/` | Any .md agent files installed? (global) | ⚠ if empty |
+| `.claude/agents/` | Any .md agent files installed? (project-level) | ℹ if present (report separately) |
 | `~/.claude/agents/orchestrator.md` | Exists? | ⚠ if missing |
 | Orchestrator type | Contains drift detection (`MISSING`, `EXTRA`, `DIVERGED`, correction loop)? | ⚠ if absent |
 
-Count total agent files. Report which key agents are installed (orchestrator, code-reviewer, verification, brainstorming, security-reviewer).
+Count total agent files across both locations. Report global vs project-level split.
+Report which key agents are installed (orchestrator, code-reviewer, verification, brainstorming, security-reviewer).
 
 If CLAUDE.md has inline Hard Rules AND `~/.claude/rules/ai-constitution.md` exists → ⚠ "Hard Rules 중복: CLAUDE.md 직접 기재 + ai-constitution.md 존재. ai-constitution.md 참조 링크로 통일 권장."
 

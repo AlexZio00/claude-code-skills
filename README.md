@@ -1,4 +1,4 @@
-# claude-code-skills v3
+# claude-code-skills v3.1
 
 Audit what's broken. Scaffold what's missing. Wire the AI. Assemble the team.
 
