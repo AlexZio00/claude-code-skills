@@ -3,11 +3,16 @@ name: "pre-push"
 description: "Mandatory pre-push security and quality pipeline. TRIGGER automatically whenever the user requests any git push: 'push my changes', 'push to origin', 'push this', 'push the code', 'commit and push', 'ship it', 'deploy to remote', 'deploy to prod/staging/production', or any git push command. Blocks hardcoded credentials (12 patterns: AWS/GCP/Azure/LLM keys, private keys, connection strings, platform tokens, merge conflicts), supply chain risks, auth bypasses, and OWASP Top 10 vulnerabilities. Do NOT skip unless user says 'skip review' or 'force push'."
 license: "MIT"
 metadata:
-  version: "3.0.0"
+  version: "3.1.0"
   author: "coinangel"
 ---
 
-<!-- v3.0.0 — scanner: scripts/scan_secrets.pl | multi-lang tests + direct lint -->
+<!--
+  v3.1.0 (2026-04-11) — defense structure: Dominant variable, Discard if,
+                         Rationalization Table (6), Invariants (4), Scope Boundary
+  v3.0.0 (2026-04-10) — scanner: scripts/scan_secrets.pl (12 patterns) |
+                         multi-lang tests + direct lint | parallel AI review agents
+-->
 # Pre-Push Pipeline
 
 **Dominant variable**: 시크릿 스캔이 예외 없이 실행되는가 — 한 번의 스킵으로 자격증명이 git history에 영구히 기록된다.
