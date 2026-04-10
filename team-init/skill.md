@@ -124,12 +124,13 @@ Light -- progress tracking + gate enforcement only
   Does NOT detect implementation drift (you check manually)
   Best for: small teams, simple workflows, trust-but-verify
 
-Full -- drift detection + automatic correction + escalation
+Full -- drift detection + automatic correction + advisor escalation
   Everything Light does, plus:
   Compares implementation output against plan spec (diff-based)
   Detects: features added that aren't in spec, features missing from spec
   On drift: sends correction to subagent (max 2 retries)
-  On repeated failure: escalates to user with specific diff
+  On repeated failure: consults opus advisor (max_uses: 2) before escalating to user
+  Orchestrator always runs on sonnet — opus called on-demand only when stuck
   Best for: complex multi-file features, parallel subagents, when you can't review every line
 ```
 
@@ -203,7 +204,7 @@ name: orchestrator
 description: "Use when executing multi-step implementation plans. Tracks progress against
 the plan, enforces review gates, [and detects implementation drift]. Automatically
 activated when writing-plans output exists and implementation begins."
-model: [sonnet for Light, opus for Full]
+model: sonnet
 tools: [Agent, Read, Glob, Grep, Bash, TodoWrite]
 ---
 
@@ -285,12 +286,24 @@ while drift_detected and attempt <= max_attempts:
   4. attempt += 1
 
 if drift_detected after max_attempts:
-  ESCALATE to user:
-  "Task [X] failed correction after 2 attempts.
-   Spec: [expected]
-   Current: [actual]
-   Attempts: [what was tried]
-   Decision needed: fix spec or fix code?"
+  # Advisor consultation before user escalation (Advisor Strategy pattern)
+  # Call opus as advisor tool (max_uses: 2) — shares same context
+  advisor_verdict = call_advisor(
+    model="opus",
+    max_uses=2,
+    prompt="Task [X] drifted after 2 correction attempts.\n"
+           "Spec: [expected]\nCurrent: [actual]\n"
+           "Recommend: fix spec / fix code / restructure approach?"
+  )
+  if advisor_verdict resolves drift:
+    apply fix, continue
+  else:
+    ESCALATE to user:
+    "Task [X] failed correction after 2 attempts + advisor consultation.
+     Spec: [expected]
+     Current: [actual]
+     Advisor recommendation: [verdict]
+     Decision needed: fix spec or fix code?"
 ```
 
 ### 5. Final Integration Review
