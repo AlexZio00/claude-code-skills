@@ -1,9 +1,9 @@
-# claude-code-skills v3.2
+# claude-code-skills v3.3
 
-Audit what's broken. Scaffold what's missing. Wire the AI. Assemble the team. Ship with confidence.
+Audit what's broken. Scaffold what's missing. Wire the AI. Assemble the team. Ship with confidence. Diagnose how you work.
 
-> **Scope:** The full lifecycle pipeline for Claude Code projects — from health check to daily push gate.
-> Five skills that build on each other. Each one is useful standalone; the full sequence covers setup to daily workflow.
+> **Scope:** The full lifecycle pipeline for Claude Code projects — from health check to daily push gate, plus an AI collaboration audit that turns your own work patterns into a diagnostic.
+> Six skills that build on each other. Each one is useful standalone; the full sequence covers setup to daily workflow.
 
 ---
 
@@ -153,13 +153,41 @@ Mandatory pipeline that runs automatically before every `git push`. Blocks on se
 
 ---
 
+### `/collab-audit` — AI Collaboration Audit
+
+Analyzes your conversation history and work patterns across 13 sections to generate a behavioral diagnosis report. No surveys. Observation only.
+
+**What it does:**
+- Reads actual conversation history — message patterns, artifact production, decision style, delegation habits
+- Profiles psychological tendencies (perfectionism, avoidance, context-switching, dependency patterns)
+- Identifies blind spots and collaboration anti-patterns with specific evidence
+- Delivers behavioral correction feedback integrated with the analysis
+
+**Why it's bundled:**
+Psychological analysis and behavioral feedback are intentionally combined. Separated, users read one and skip the other.
+
+**Compare mode:**
+```
+/collab-audit compare    # diff latest two audits — shows what shifted
+```
+
+**Constraints:**
+- Requires 2+ sessions or 100+ messages (or 1 high-density session: 50+ messages with substantial artifacts or deep technical dialogue)
+- No self-report: does not ask you how you work — observes what you actually did
+- Output saved to `~/.claude/collab-audits/YYYY-MM-DD.md`
+
+**Why it matters:**
+AI amplifies your existing work patterns — good and bad. Most people don't know which patterns are costing them until they see them documented with evidence.
+
+---
+
 ## Installation
 
 ```bash
 # macOS / Linux
 SKILLS_DIR=~/.claude/skills
 
-mkdir -p $SKILLS_DIR/{project-check,project-init,harness-init,team-init,pre-push/scripts}
+mkdir -p $SKILLS_DIR/{project-check,project-init,harness-init,team-init,pre-push/scripts,collab-audit}
 
 cp project-check/SKILL.md   $SKILLS_DIR/project-check/SKILL.md
 cp project-init/SKILL.md    $SKILLS_DIR/project-init/SKILL.md
@@ -167,13 +195,14 @@ cp harness-init/SKILL.md    $SKILLS_DIR/harness-init/SKILL.md
 cp team-init/SKILL.md       $SKILLS_DIR/team-init/SKILL.md
 cp pre-push/SKILL.md        $SKILLS_DIR/pre-push/SKILL.md
 cp pre-push/scripts/scan_secrets.pl $SKILLS_DIR/pre-push/scripts/scan_secrets.pl
+cp collab-audit/SKILL.md    $SKILLS_DIR/collab-audit/SKILL.md
 ```
 
 ```bat
 :: Windows
 set SKILLS=%USERPROFILE%\.claude\skills
-for %d in (project-check project-init harness-init team-init pre-push) do mkdir "%SKILLS%\%d" 2>nul
-for %d in (project-check project-init harness-init team-init pre-push) do copy %d\SKILL.md "%SKILLS%\%d\SKILL.md"
+for %d in (project-check project-init harness-init team-init pre-push collab-audit) do mkdir "%SKILLS%\%d" 2>nul
+for %d in (project-check project-init harness-init team-init pre-push collab-audit) do copy %d\SKILL.md "%SKILLS%\%d\SKILL.md"
 mkdir "%SKILLS%\pre-push\scripts" 2>nul
 copy pre-push\scripts\scan_secrets.pl "%SKILLS%\pre-push\scripts\scan_secrets.pl"
 ```
@@ -186,6 +215,7 @@ Invoke in any Claude Code session:
 /harness-init     # set up Claude Code agent infrastructure
 /team-init        # assemble your coding agent team
 /pre-push         # run before git push (also triggers automatically on push requests)
+/collab-audit     # diagnose your AI collaboration patterns (2+ sessions or 100+ messages)
 ```
 
 ---
@@ -209,7 +239,7 @@ then: use /pre-push on every git push going forward
 /pre-push        → active on every subsequent push
 ```
 
-The five skills map to the full project lifecycle:
+The six skills map to the full project lifecycle:
 
 | Phase | Skill | Frequency |
 |-------|-------|-----------|
@@ -218,6 +248,7 @@ The five skills map to the full project lifecycle:
 | Wire AI | `/harness-init` | Once |
 | Build team | `/team-init` | Once |
 | **Ship daily** | **`/pre-push`** | **Every push** |
+| Reflect | `/collab-audit` | Periodic |
 
 > **Standalone use:** Each skill works independently. `/pre-push` works on any project — it auto-detects the language and only runs relevant checks.
 
@@ -255,6 +286,7 @@ These came from painful experience on a large production system:
 - [x] `/harness-init` — agent infrastructure setup
 - [x] `/team-init` — agent team assembly
 - [x] `/pre-push` — pre-push quality gate (secrets + tests + lint + AI review)
+- [x] `/collab-audit` — AI collaboration pattern diagnosis (13 sections, observation-only)
 
 ---
 
