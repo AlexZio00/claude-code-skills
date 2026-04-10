@@ -631,6 +631,18 @@ Folder structure: suggested as text in conversation only — not created on disk
 
 ---
 
+## Rationalization Table
+
+| 합리화 | 반박 |
+|--------|------|
+| "Hard Rules는 나중에 추가해도 돼" | 코드가 먼저 생기면 규칙이 이미 위반된 상태로 시작된다 |
+| "프로젝트가 단순해서 CLAUDE.md까지 필요 없어" | 단순한 프로젝트도 다음 세션에 컨텍스트 재설명이 필요해진다 |
+| ".env.example은 나만 쓰는 프로젝트라 생략해도 돼" | 나도 3개월 뒤에는 '다른 사람'이다 |
+| "인터뷰가 너무 길어, 그냥 파일만 만들어줘" | 질문 없이 생성하면 Hard Rules가 도메인과 맞지 않는다 |
+| "Hard Rules를 빈 섹션으로 두면 나중에 채울게" | 빈 Hard Rules는 없는 것과 같다. 최소 1개는 항상 필요하다 |
+
+---
+
 ## Invariants (never violate)
 
 1. **Hard Rules always present**: Never generate CLAUDE.md without at least one Hard Rule. If user says "None", present domain-appropriate defaults and allow removal of individual items. Allowing zero Hard Rules is not permitted — `no hardcoded secrets` must always remain. Violation → CLAUDE.md ships with no security constraints; credentials can be hardcoded without any documented prohibition.

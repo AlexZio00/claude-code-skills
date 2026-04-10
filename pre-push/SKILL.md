@@ -10,6 +10,9 @@ metadata:
 <!-- v3.0.0 — scanner: scripts/scan_secrets.pl | multi-lang tests + direct lint -->
 # Pre-Push Pipeline
 
+**Dominant variable**: 시크릿 스캔이 예외 없이 실행되는가 — 한 번의 스킵으로 자격증명이 git history에 영구히 기록된다.
+**Discard if**: 사용자가 "skip review" 또는 "force push"를 명시적으로 요청한 경우 → Emergency Override 섹션으로 직행.
+
 > ⛔ **BLOCKING REQUIREMENT**: Complete this pipeline and resolve all Critical/High issues BEFORE executing `git push`.
 
 ## Step 1: Assess & Scan
@@ -252,3 +255,42 @@ Execute `git push` only when Overall = **READY TO PUSH**.
 If user explicitly says "skip review" or "force push":
 1. Print: `⚠️ Pre-push pipeline bypassed by user request. Secrets scan and agent reviews were NOT run.`
 2. Execute `git push` immediately.
+
+---
+
+## Rationalization Table
+
+| 합리화 | 반박 |
+|--------|------|
+| "diff가 작으니까 스캔 필요 없어" | 1줄짜리 diff도 API 키 1개 포함 가능 |
+| "이미 로컬에서 테스트 통과했어" | 로컬 통과 ≠ 스테이지 diff 안전. 다른 파일이 스테이징에 섞일 수 있음 |
+| "docs만 바꿨으니까 괜찮아" | SECRETS_EXIT=0 + docs-only이면 Step 2에서 자동 fast-exit됨. 직접 스킵하지 말 것 |
+| "시크릿이 있어도 private repo라 괜찮아" | private repo는 보호가 아님. 팀원 전원 접근 가능하고 git history는 영구적 |
+| "보안 리뷰어 트리거 조건이 안 맞아서 수동으로 스킵할게" | 트리거 조건 미충족이면 자동으로 NOT TRIGGERED. 수동 스킵은 별개 문제 |
+| "급한 버그 fix라 스킵해도 돼" | 급할수록 실수 가능성 높음. 시크릿 스캔은 <10초 |
+
+---
+
+## Invariants (never violate)
+
+1. **시크릿 스캔은 항상 실행**: SECRETS_EXIT=1이면 push BLOCK. "그냥 push해" 요청도 Emergency Override 확인 없이는 우회 불가. Violation → 자격증명이 git history에 영구히 남고 원격 저장소 전체가 오염된다.
+
+2. **보호 브랜치 확인**: main/master push는 명시적 "yes" 없이 진행 불가. Violation → 미검증 코드가 프로덕션 브랜치에 직접 유입된다.
+
+3. **Critical/High는 push 차단**: 에이전트 리뷰에서 Critical/High 발견 시 수정 없이 push 불가. Medium은 5분 내 수정 또는 TODO 태그. Violation → 알려진 취약점이 원격에 배포된다.
+
+4. **추가 라인만 스캔**: 시크릿을 제거하는 `-` 라인은 스캔 대상이 아님. Violation → 시크릿 제거 커밋이 BLOCK되어 정리가 불가능해진다.
+
+These rules are unconditional. Emergency Override는 사용자가 명시적으로 "skip review" 또는 "force push"를 말한 경우에만 적용된다.
+
+---
+
+## Scope Boundary
+
+| Does | Does NOT |
+|------|----------|
+| 스테이지 diff에서 시크릿 스캔 (추가 라인만) | 커밋 생성 또는 수정 |
+| 언어별 테스트 실행 (변경 파일만) | 전체 테스트 스위트 강제 실행 |
+| 병렬 에이전트 리뷰 (code/security/db/refactor) | 코드 직접 수정 (fix loop 제외) |
+| 보호 브랜치 확인 (main/master) | git history 수정 또는 rebase |
+| push 실행 (모든 게이트 통과 시) | `--force` 또는 `--no-verify` push |

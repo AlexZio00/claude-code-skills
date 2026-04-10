@@ -616,6 +616,18 @@ Files generated at `~/.claude/` (global) unless noted:
 
 ---
 
+## Rationalization Table
+
+| 합리화 | 반박 |
+|--------|------|
+| "violation testing은 시간 낭비야, 규칙이 명확하잖아" | 명확하게 쓴 규칙도 에이전트가 우회한다. 테스트가 증명이다 |
+| "settings.json을 통째로 덮어쓰는 게 더 빠르잖아" | 기존 hooks가 전부 사라진다. 복구 방법이 없다 |
+| "ai-constitution.md에 기존 규칙이 있으니까 삭제해도 돼" | 삭제는 Invariant 1 위반. 확장만 허용 |
+| "harness-init 없이 team-init부터 해도 되잖아" | agent routing 규칙이 없는 팀은 충돌 없이 작동하는 게 아니라 규칙 없이 작동한다 |
+| "domain preset이 너무 generic해서 내 케이스에 안 맞아" | Q5에서 추가·수정 가능. preset은 출발점이지 전부가 아니다 |
+
+---
+
 ## Invariants (never violate)
 
 1. **Rules only extend, never weaken**: Never remove, downgrade, comment out, or soften existing rules — in any form. Commenting out is functionally equivalent to deletion. Applies to all tiers, all files. Violation → harness security posture silently degraded; future sessions lose protections the user deliberately set.

@@ -854,6 +854,18 @@ Updated:
 
 ---
 
+## Rationalization Table
+
+| 합리화 | 반박 |
+|--------|------|
+| "orchestrator 없이 에이전트 2-3개만 써도 충분해" | 드리프트 감지 없는 팀은 TODO 리스트와 다를 게 없다 |
+| "기존 orchestrator.md가 있으니까 그냥 두면 되잖아" | 기존 오케스트레이터가 현재 팀 구성을 반영하지 않으면 gate 오류가 조용히 발생한다 |
+| "harness-init 먼저 안 해도 team-init만 실행해도 돼" | agents.md 없이 생성된 팀은 routing 규칙이 없다 |
+| "Solo 3개로 시작했다가 나중에 Full로 늘리면 되잖아" | 늘려도 됨. 단 orchestrator는 팀 변경 시 반드시 Update 필요 |
+| "에이전트가 많을수록 좋은 거 아니야?" | 에이전트 수 ≠ 품질. 드리프트 감지 오케스트레이터 1개가 조율 없는 에이전트 5개보다 낫다 |
+
+---
+
 ## Invariants (never violate)
 
 1. **Existing agents untouched**: Never modify, overwrite, or delete an agent file that already exists in `~/.claude/agents/`. If the agent exists, skip it and report "already installed". The user's customizations are sacred. **Exception — orchestrator only**: if `orchestrator.md` already exists, offer Update / Replace / Cancel instead of silently skipping. Orchestrator is the team's coordination layer; it must reflect the current team configuration. All other agents: skip without prompting. Violation -> user's carefully tuned agent logic destroyed; may break existing workflows that depend on specific agent behavior.
