@@ -290,6 +290,30 @@ These came from painful experience on a large production system:
 
 ---
 
+## Changelog
+
+### v3.4 — Defense structure upgrade (2026-04-11)
+- All 6 skills: added **Rationalization Table** (common rationalization patterns + rebuttals)
+- `pre-push`: added **Dominant variable**, **Discard if**, **Invariants with consequences**, **Scope Boundary** — format now consistent with the rest of the suite
+- `project-check/init/harness-init/team-init`: Rationalization Table (5 entries each)
+
+### v3.3 — AI Collaboration Audit (2026-04-11)
+- Added `/collab-audit` — 13-section behavioral diagnosis from conversation observation. Compare mode, gitignore protection, observation-only (no surveys).
+
+### v3.2 — Orchestrator upgrade (2026-04-10)
+- `team-init`: Advisor Strategy pattern added to Full orchestrator — consults opus advisor before user escalation, spot-check on sonnet after haiku pass
+
+### v3.1 — Harness + project-check polish (2026-04-09)
+- `project-check`: Anthropic key pattern, C/C++ file support, project-level agents scan
+- `harness-init`: Smart Defaults, violation testing per Tier-0 rule (not 3 total), Memory Discipline unconditional label
+
+### v3.0 — v3 rewrite (2026-04-08)
+- Introduced `project-check` — read-only health scan, scale-aware, Security-first report
+- Applied v3 patterns across all skills: **Dominant variable**, **Discard if**, Invariants with failure-mode consequences
+- `pre-push` v3.0.0: `scan_secrets.pl` scanner (12 patterns), parallel AI review agents, language-aware test/lint detection
+
+---
+
 ## References
 
 - [ReS0421/coding-team-orchestrator](https://github.com/ReS0421/coding-team-orchestrator) — Several orchestration patterns in `/team-init` were adapted from this project: "Do Not Trust the Report" (spec reviewer reads code directly, not the implementer's claim), Final Integration Review (cross-task consistency check via `git diff BASE_SHA..HEAD`), and CRITICAL/IMPORTANT/MINOR severity tiers for the correction loop.
