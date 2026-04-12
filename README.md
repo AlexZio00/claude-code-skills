@@ -1,13 +1,34 @@
-# claude-code-skills v3.5
+# claude-code-skills v3.6
 
-Audit what's broken. Scaffold what's missing. Wire the AI. Assemble the team. Ship with confidence. Diagnose how you work.
+Audit what's broken. Scaffold what's missing. Wire the AI. Assemble the team. Lock scope before you build. Ship with confidence. Diagnose how you work.
 
-> **Scope:** The full lifecycle pipeline for Claude Code projects — from health check to daily push gate, plus an AI collaboration audit that turns your own work patterns into a diagnostic.
-> Six skills that build on each other. Each one is useful standalone; the full sequence covers setup to daily workflow.
+> **Scope:** The full lifecycle pipeline for Claude Code projects — from health check to daily push gate, plus scope locking before implementation and an AI collaboration audit that turns your own work patterns into a diagnostic.
+> Seven skills that build on each other. Each one is useful standalone; the full sequence covers setup to daily workflow.
 
 ---
 
 ## Skills
+
+### `/brief` — Scope Locking Before Implementation
+
+Converts a vague feature idea into a locked brief before any code is written. Forces explicit scope OUT before implementation starts.
+
+**What it does:**
+- Asks at most 3 clarifying questions, then generates the brief
+- Produces: Goal / Scope IN / **Scope OUT** (mandatory, min 2 items) / Constraints / Exit Criteria / Risk Flags
+- Scope OUT items must be plausible extensions someone would suggest — not far-fetched exclusions
+- Exit Criteria require "observable action → measurable result" format. Vague criteria are auto-rejected and rewritten
+- Saves to `BRIEF.md` only after explicit approval
+
+**Why Scope OUT is mandatory:**
+People specify what to build but rarely specify what NOT to build. The skill's core value is forcing that conversation upfront. `BRIEF.md` only saves when Scope OUT has at least 2 entries — this is unconditional.
+
+**Conservative scope floor:**
+When input is ambiguous, the skill defaults to the minimum viable scope — but always includes at least one complete user flow and one user-visible outcome. Narrows rather than expands under uncertainty.
+
+**Discard if:** bug fix, single-file change, or a spec is already written.
+
+---
 
 ### `/project-check` — Existing Project Health Scan
 
@@ -189,8 +210,9 @@ AI amplifies your existing work patterns — good and bad. Most people don't kno
 # macOS / Linux
 SKILLS_DIR=~/.claude/skills
 
-mkdir -p $SKILLS_DIR/{project-check,project-init,harness-init,team-init,pre-push/scripts,collab-audit}
+mkdir -p $SKILLS_DIR/{brief,project-check,project-init,harness-init,team-init,pre-push/scripts,collab-audit}
 
+cp brief/SKILL.md           $SKILLS_DIR/brief/SKILL.md
 cp project-check/SKILL.md   $SKILLS_DIR/project-check/SKILL.md
 cp project-init/SKILL.md    $SKILLS_DIR/project-init/SKILL.md
 cp harness-init/SKILL.md    $SKILLS_DIR/harness-init/SKILL.md
@@ -203,8 +225,8 @@ cp collab-audit/SKILL.md    $SKILLS_DIR/collab-audit/SKILL.md
 ```bat
 :: Windows
 set SKILLS=%USERPROFILE%\.claude\skills
-for %d in (project-check project-init harness-init team-init pre-push collab-audit) do mkdir "%SKILLS%\%d" 2>nul
-for %d in (project-check project-init harness-init team-init pre-push collab-audit) do copy %d\SKILL.md "%SKILLS%\%d\SKILL.md"
+for %d in (brief project-check project-init harness-init team-init pre-push collab-audit) do mkdir "%SKILLS%\%d" 2>nul
+for %d in (brief project-check project-init harness-init team-init pre-push collab-audit) do copy %d\SKILL.md "%SKILLS%\%d\SKILL.md"
 mkdir "%SKILLS%\pre-push\scripts" 2>nul
 copy pre-push\scripts\scan_secrets.pl "%SKILLS%\pre-push\scripts\scan_secrets.pl"
 ```
@@ -212,6 +234,7 @@ copy pre-push\scripts\scan_secrets.pl "%SKILLS%\pre-push\scripts\scan_secrets.pl
 Invoke in any Claude Code session:
 
 ```
+/brief            # lock scope before implementation — Goal / Scope IN+OUT / Exit Criteria
 /project-check    # audit an existing project (read-only)
 /project-init     # scaffold a new project
 /harness-init     # set up Claude Code agent infrastructure
@@ -241,7 +264,7 @@ then: use /pre-push on every git push going forward
 /pre-push        → active on every subsequent push
 ```
 
-The six skills map to the full project lifecycle:
+The seven skills map to the full project lifecycle:
 
 | Phase | Skill | Frequency |
 |-------|-------|-----------|
@@ -249,6 +272,7 @@ The six skills map to the full project lifecycle:
 | Bootstrap | `/project-init` | Once |
 | Wire AI | `/harness-init` | Once |
 | Build team | `/team-init` | Once |
+| **Lock scope** | **`/brief`** | **Before each feature** |
 | **Ship daily** | **`/pre-push`** | **Every push** |
 | Reflect | `/collab-audit` | Periodic |
 
@@ -289,10 +313,14 @@ These came from painful experience on a large production system:
 - [x] `/team-init` — agent team assembly
 - [x] `/pre-push` — pre-push quality gate (secrets + tests + lint + AI review)
 - [x] `/collab-audit` — AI collaboration pattern diagnosis (13 sections, observation-only)
+- [x] `/brief` — scope locking before implementation (Scope OUT mandatory, Exit Criteria action+result format)
 
 ---
 
 ## Changelog
+
+### v3.6 — Scope locking (2026-04-12)
+- Added `/brief` — scope locking before implementation. Scope OUT mandatory (min 2 items, plausible extensions only). Exit Criteria require observable action + measurable result format — vague criteria auto-rejected. Conservative minimum scope floor: one complete user flow + one user-visible outcome. 7 invariants.
 
 ### v3.5 — Harness Engineering patterns (2026-04-12)
 - `harness-init`: Added `tasks/lessons.md` generation + SubagentStop lifecycle hook to generated harness. SessionStart hook now loads lessons.md on session start.
