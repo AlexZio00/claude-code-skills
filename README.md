@@ -7,6 +7,33 @@ Audit what's broken. Scaffold what's missing. Wire the AI. Assemble the team. Lo
 
 ---
 
+## Quick Start
+
+**New project (10 min):**
+```
+/project-init    →  CLAUDE.md + ROADMAP + .gitignore + .env.example
+/harness-init    →  rules/ + hooks + memory/ + agent routing
+/team-init       →  orchestrator + reviewers + implementers
+then: /brief before each feature · /pre-push before each push
+```
+
+**Existing project (5 min):**
+```
+/project-check   →  Score N/10 + gap list ordered by severity
+  gaps found     →  /project-init (Update mode) + /harness-init + /team-init
+  score ≥ 8      →  fix ⚠ items only
+then: /brief + /pre-push as daily habits
+```
+
+**Already set up, just want the daily loop:**
+```
+/brief           →  before starting any feature
+/pre-push        →  before every git push
+/collab-audit    →  monthly to see what patterns have shifted
+```
+
+---
+
 ## Skills
 
 ### `/brief` — Scope Locking Before Implementation
@@ -277,6 +304,20 @@ The seven skills map to the full project lifecycle:
 | Reflect | `/collab-audit` | Periodic | Work pattern blind spots surfaced with evidence — not self-report |
 
 > **Standalone use:** Each skill works independently. `/pre-push` works on any project — it auto-detects the language and only runs relevant checks.
+
+---
+
+## When to Use Each Skill
+
+| Skill | Use when… |
+|-------|-----------|
+| `/brief` | You're about to implement a feature and the requirements feel open-ended. Also: when a previous feature grew mid-sprint — run brief before the next one. |
+| `/project-check` | You inherited a repo and want to know the setup state. Or: you just ran `/project-init` and want to verify it landed. Also: run periodically when something keeps breaking at the infrastructure level. |
+| `/project-init` | Starting a new codebase. Or: you have code but no `CLAUDE.md`, no `ROADMAP`, no `.gitignore`. Also: handing a project to AI for the first time. |
+| `/harness-init` | First Claude Code session on a project. Or: you keep re-explaining conventions at every session start. Run after `/project-init`. |
+| `/team-init` | You want drift detection without reviewing every subagent output yourself. Or: your orchestrator was built manually and has no correction loop. Run after `/harness-init`. |
+| `/pre-push` | Before every `git push`. Set it as a habit trigger — "I type `git push`, I run this first." Also useful for onboarding: run it once to show a new contributor what the baseline looks like. |
+| `/collab-audit` | After 2+ weeks of active use. Or: sessions are getting less productive and you can't pinpoint why. Run monthly with `compare` mode to see what shifted. |
 
 ---
 
