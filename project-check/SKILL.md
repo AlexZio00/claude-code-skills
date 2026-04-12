@@ -101,6 +101,8 @@ Check Claude Code infrastructure:
 | `.claude/agents/` | Any .md agent files installed? (project-level) | ℹ if present (report separately) |
 | `~/.claude/agents/orchestrator.md` | Exists? | ⚠ if missing |
 | Orchestrator type | Contains drift detection (`MISSING`, `EXTRA`, `DIVERGED`, correction loop)? | ⚠ if absent |
+| `tasks/lessons.md` | Exists? (skip if scale=script) | ⚠ if scale=full/mini |
+| SubagentStop hook | `settings.json` hooks에 SubagentStop 포함? | ⚠ if missing |
 
 Count total agent files across both locations. Report global vs project-level split.
 Report which key agents are installed (orchestrator, code-reviewer, verification, brainstorming, security-reviewer).

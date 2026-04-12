@@ -30,6 +30,7 @@ Check each target file before generating:
 | `~/.claude/rules/output-style.md` | Read it. Offer: update or replace. |
 | `~/.claude/settings.json` (hooks) | Always merge — append to existing arrays, never overwrite. |
 | `memory/MEMORY.md` | Read it. Append new sections, preserve existing entries. |
+| `tasks/lessons.md` | If exists → read it. Contains AI behavior correction rules from past sessions. |
 
 **Merge algorithm for hooks (settings.json):**
 ```
@@ -478,7 +479,7 @@ Generate actual working commands, not placeholders:
     "SessionStart": [{
       "hooks": [{
         "type": "command",
-        "command": "echo '=== Session Start ==='; echo \"Project: $(basename $(pwd))\"; HANDOFF=$(ls .claude/memory/session-handoff-LATEST.md 2>/dev/null || ls memory/session-handoff-LATEST.md 2>/dev/null); if [ -n \"$HANDOFF\" ]; then echo '--- Handoff ---'; cat \"$HANDOFF\"; fi"
+        "command": "echo '=== Session Start ==='; echo \"Project: $(basename $(pwd))\"; HANDOFF=$(ls .claude/memory/session-handoff-LATEST.md 2>/dev/null || ls memory/session-handoff-LATEST.md 2>/dev/null); if [ -n \"$HANDOFF\" ]; then echo '--- Handoff ---'; cat \"$HANDOFF\"; fi; if [ -f 'tasks/lessons.md' ]; then echo '--- Lessons ---'; cat 'tasks/lessons.md'; fi"
       }]
     }],
     "PreCompact": [{
@@ -491,6 +492,12 @@ Generate actual working commands, not placeholders:
       "hooks": [{
         "type": "command",
         "command": "echo '[SESSION END] Consider saving context for next session.'"
+      }]
+    }],
+    "SubagentStop": [{
+      "hooks": [{
+        "type": "command",
+        "command": "echo \"[SUBAGENT STOP] agent_id=${AGENT_ID} | transcript=${AGENT_TRANSCRIPT_PATH}\""
       }]
     }]
   }
@@ -612,6 +619,7 @@ Files generated at `~/.claude/` (global) unless noted:
 - `settings.json` (merged, never replaced) — hooks always added
 - `memory/MEMORY.md` — if structured memory selected
 - `memory/session-handoff-LATEST.md` — if structured memory selected
+- `tasks/lessons.md` — if structured memory selected. Template: `# tasks/lessons.md — AI 행동 교정 규칙\n> 반복 실수 발생 시 여기에 기록 → 다음 세션 시작 시 리뷰`
 - `docs/harness-tests.md` — violation test results
 
 ---

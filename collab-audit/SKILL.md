@@ -166,6 +166,7 @@ Claude 사용 데이터 없으면 → "해당 없음"으로 표기하고 다음 
 - L2: MEMORY.md + 세션 핸드오프 운용
 - L3: Compact Instructions 설정 + 훅 활용
 - L4: 세션 간 컨텍스트 손실 없음, AI를 장기 파트너로 운용
+- L5: `tasks/lessons.md` 운용 — AI 행동 교정 루프 존재. 반복 실수를 룰로 전환하는 메타 레이어 구축. Boris Cherny의 개발자 워크플로우 방법론에서 파생 (출처: *Programming TypeScript* 저자, Meta Staff Engineer)
 
 컨텍스트 날아간 후 복구 패턴도 기술.
 
