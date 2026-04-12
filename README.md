@@ -266,15 +266,15 @@ then: use /pre-push on every git push going forward
 
 The seven skills map to the full project lifecycle:
 
-| Phase | Skill | Frequency |
-|-------|-------|-----------|
-| Diagnose | `/project-check` | On-demand |
-| Bootstrap | `/project-init` | Once |
-| Wire AI | `/harness-init` | Once |
-| Build team | `/team-init` | Once |
-| **Lock scope** | **`/brief`** | **Before each feature** |
-| **Ship daily** | **`/pre-push`** | **Every push** |
-| Reflect | `/collab-audit` | Periodic |
+| Phase | Skill | Frequency | Benefit |
+|-------|-------|-----------|---------|
+| Diagnose | `/project-check` | On-demand | Know exactly what's broken before you touch anything — ordered by severity |
+| Bootstrap | `/project-init` | Once | Hard Rules locked before the first line of code; retrofitting them costs more later |
+| Wire AI | `/harness-init` | Once | Every future session starts with full context — no re-explaining conventions |
+| Build team | `/team-init` | Once | Implementation drift is caught automatically; you see escalations, not every subagent output |
+| **Lock scope** | **`/brief`** | **Before each feature** | **Scope OUT defined before code starts — "this too" additions get blocked at the gate, not mid-sprint** |
+| **Ship daily** | **`/pre-push`** | **Every push** | **Secrets, tests, and critical review findings blocked before they land in remote** |
+| Reflect | `/collab-audit` | Periodic | Work pattern blind spots surfaced with evidence — not self-report |
 
 > **Standalone use:** Each skill works independently. `/pre-push` works on any project — it auto-detects the language and only runs relevant checks.
 
