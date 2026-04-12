@@ -1,4 +1,4 @@
-# claude-code-skills v3.4
+# claude-code-skills v3.5
 
 Audit what's broken. Scaffold what's missing. Wire the AI. Assemble the team. Ship with confidence. Diagnose how you work.
 
@@ -17,7 +17,7 @@ Read-only audit of an existing project across four dimensions: Infrastructure, S
 - **Security** (always first): hardcoded secrets, API keys, `.env` not in `.gitignore`
 - **Infrastructure**: `CLAUDE.md`, `Hard Rules`, `Secrets Policy`, `ROADMAP`, `.gitignore`, `.env.example`, `docs/decisions/`
 - **Quality**: test/source file ratio, debug remnants, open work markers (TODO/FIXME)
-- **Harness**: `ai-constitution.md`, `agents.md`, hooks, installed agents, orchestrator type
+- **Harness**: `ai-constitution.md`, `agents.md`, hooks, installed agents, orchestrator type, `tasks/lessons.md`, SubagentStop hook
 
 **Why it matters:**
 Most projects have gaps they don't know about — missing Hard Rules, hardcoded credentials buried in a config, no test infrastructure, or a harness that was never wired up. This skill surfaces all of it in one scan before you make things worse.
@@ -66,10 +66,12 @@ Sets up the full Claude Code harness layer — rules, hooks, memory, agent routi
 │   ├── output-style.md          # response formatting
 │   └── development-workflow.md  # review gate pipeline
 ├── settings.json                # hooks (merged, not overwritten)
+│                                # includes SessionStart, PreCompact, Stop, SubagentStop
 └── projects/[project]/
     └── memory/
         ├── MEMORY.md
-        └── session-handoff-LATEST.md
+        ├── session-handoff-LATEST.md
+        └── tasks/lessons.md     # AI behavior correction log (Boris Cherny pattern)
 ```
 
 **Why it matters:**
@@ -292,6 +294,13 @@ These came from painful experience on a large production system:
 
 ## Changelog
 
+### v3.5 — Harness Engineering patterns (2026-04-12)
+- `harness-init`: Added `tasks/lessons.md` generation + SubagentStop lifecycle hook to generated harness. SessionStart hook now loads lessons.md on session start.
+- `project-check`: Added `tasks/lessons.md` and SubagentStop hook to Harness scan checklist.
+- `collab-audit`: Section 8 context maturity Level 5 — `tasks/lessons.md` operation as meta-layer.
+- **`tasks/lessons.md` pattern** (Boris Cherny, *Programming TypeScript*): Record repeated AI mistakes as correction rules on the spot → review at next session start. Separates behavior correction (lessons.md) from technical knowledge (MEMORY.md).
+- **SubagentStop hook**: Logs agent completions with ID + transcript path for debugging multi-agent workflows.
+
 ### v3.4 — Defense structure upgrade (2026-04-11)
 - All 6 skills: added **Rationalization Table** (common rationalization patterns + rebuttals)
 - `pre-push`: added **Dominant variable**, **Discard if**, **Invariants with consequences**, **Scope Boundary** — format now consistent with the rest of the suite
@@ -318,6 +327,7 @@ These came from painful experience on a large production system:
 
 - [ReS0421/coding-team-orchestrator](https://github.com/ReS0421/coding-team-orchestrator) — Several orchestration patterns in `/team-init` were adapted from this project: "Do Not Trust the Report" (spec reviewer reads code directly, not the implementer's claim), Final Integration Review (cross-task consistency check via `git diff BASE_SHA..HEAD`), and CRITICAL/IMPORTANT/MINOR severity tiers for the correction loop.
 - [obra/superpowers](https://github.com/obra/superpowers) — writing-plans + subagent-driven-development patterns that influenced the planning pipeline.
+- [Boris Cherny](https://github.com/bcherny) (*Programming TypeScript*, Meta Staff Engineer) — `tasks/lessons.md` behavior correction loop: record repeated mistakes as correction rules, review at session start. Separates behavior correction from technical memory.
 
 ---
 
