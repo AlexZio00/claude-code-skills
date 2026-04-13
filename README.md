@@ -1,20 +1,25 @@
-# claude-code-skills v3.6
+# claude-code-skills v4.0
 
-Audit what's broken. Scaffold what's missing. Wire the AI. Assemble the team. Lock scope before you build. Ship with confidence. Diagnose how you work.
+Audit what's broken. Scaffold what's missing. Wire the AI. Assemble the team. Lock scope. Record decisions. Open sessions right. Close sessions right. Ship with confidence. Diagnose how you work.
 
-> **Scope:** The full lifecycle pipeline for Claude Code projects — from health check to daily push gate, plus scope locking before implementation and an AI collaboration audit that turns your own work patterns into a diagnostic.
-> Seven skills that build on each other. Each one is useful standalone; the full sequence covers setup to daily workflow.
+> **Scope:** The full lifecycle pipeline for Claude Code projects — from health check to daily push gate, session management, and an AI collaboration audit that turns your own work patterns into a diagnostic.
+> Ten skills that build on each other. Each one is useful standalone; the full sequence covers setup to daily workflow to session lifecycle.
 
 ---
 
 ## Quick Start
 
-**New project (10 min):**
+**New project (15 min):**
 ```
 /project-init    →  CLAUDE.md + ROADMAP + .gitignore + .env.example
 /harness-init    →  rules/ + hooks + memory/ + agent routing
 /team-init       →  orchestrator + reviewers + implementers
-then: /brief before each feature · /pre-push before each push
+then:
+  /session-start     at the start of every session
+  /brief             before each feature
+  /adr               after key design decisions
+  /pre-push          before each push
+  /session-checkpoint  at the end of every session
 ```
 
 **Existing project (5 min):**
@@ -22,42 +27,28 @@ then: /brief before each feature · /pre-push before each push
 /project-check   →  Score N/10 + gap list ordered by severity
   gaps found     →  /project-init (Update mode) + /harness-init + /team-init
   score ≥ 8      →  fix ⚠ items only
-then: /brief + /pre-push as daily habits
+then: /session-start + /session-checkpoint as daily session bookends
 ```
 
 **Already set up, just want the daily loop:**
 ```
-/brief           →  before starting any feature
-/pre-push        →  before every git push
-/collab-audit    →  monthly to see what patterns have shifted
+/session-start      →  load handoff, flag lessons, ready signal
+/brief              →  before starting any feature
+/adr                →  after any non-obvious design choice
+/pre-push           →  before every git push
+/session-checkpoint →  at session end, before /compact
+/collab-audit       →  monthly to see what patterns have shifted
 ```
 
 ---
 
 ## Skills
 
-### `/brief` — Scope Locking Before Implementation
-
-Converts a vague feature idea into a locked brief before any code is written. Forces explicit scope OUT before implementation starts.
-
-**What it does:**
-- Asks at most 3 clarifying questions, then generates the brief
-- Produces: Goal / Scope IN / **Scope OUT** (mandatory, min 2 items) / Constraints / Exit Criteria / Risk Flags
-- Scope OUT items must be plausible extensions someone would suggest — not far-fetched exclusions
-- Exit Criteria require "observable action → measurable result" format. Vague criteria are auto-rejected and rewritten
-- Saves to `BRIEF.md` only after explicit approval
-
-**Why Scope OUT is mandatory:**
-People specify what to build but rarely specify what NOT to build. The skill's core value is forcing that conversation upfront. `BRIEF.md` only saves when Scope OUT has at least 2 entries — this is unconditional.
-
-**Conservative scope floor:**
-When input is ambiguous, the skill defaults to the minimum viable scope — but always includes at least one complete user flow and one user-visible outcome. Narrows rather than expands under uncertainty.
-
-**Discard if:** bug fix, single-file change, or a spec is already written.
+### Project Setup
 
 ---
 
-### `/project-check` — Existing Project Health Scan
+#### `/project-check` — Existing Project Health Scan
 
 Read-only audit of an existing project across four dimensions: Infrastructure, Security, Quality, and Harness. Surfaces all gaps ordered by severity with a Score out of 10.
 
@@ -74,7 +65,7 @@ Most projects have gaps they don't know about — missing Hard Rules, hardcoded 
 
 ---
 
-### `/project-init` — New Project Setup Interview
+#### `/project-init` — New Project Setup Interview
 
 Conversational interview that generates `CLAUDE.md` + `DEVELOPMENT_ROADMAP.md` before you write a single line of code.
 
@@ -93,7 +84,7 @@ Most projects skip the "invariants first" step. By the time you add Hard Rules, 
 
 ---
 
-### `/harness-init` — Claude Code Agent Infrastructure Setup
+#### `/harness-init` — Claude Code Agent Infrastructure Setup
 
 Sets up the full Claude Code harness layer — rules, hooks, memory, agent routing — from a 6-question interview.
 
@@ -118,7 +109,7 @@ Sets up the full Claude Code harness layer — rules, hooks, memory, agent routi
 └── projects/[project]/
     └── memory/
         ├── MEMORY.md
-        ├── session-handoff-LATEST.md
+        ├── session-handoff.md
         └── tasks/lessons.md     # AI behavior correction log (Boris Cherny pattern)
 ```
 
@@ -129,7 +120,7 @@ The harness layer determines how productive every Claude Code session will be. B
 
 ---
 
-### `/team-init` — Agent Team Assembly
+#### `/team-init` — Agent Team Assembly
 
 Generates a complete coding team — orchestrator, reviewers, implementers — from a 3-question interview.
 
@@ -161,7 +152,47 @@ The orchestrator's correction loop catches implementation drift automatically �
 
 ---
 
-### `/pre-push` — Pre-Push Quality Gate
+### Daily Workflow
+
+---
+
+#### `/brief` — Scope Locking Before Implementation
+
+Converts a vague feature idea into a locked brief before any code is written. Forces explicit scope OUT before implementation starts.
+
+**What it does:**
+- Asks at most 3 clarifying questions, then generates the brief
+- Produces: Goal / Scope IN / **Scope OUT** (mandatory, min 2 items) / Constraints / Exit Criteria / Risk Flags
+- Scope OUT items must be plausible extensions someone would suggest — not far-fetched exclusions
+- Exit Criteria require "observable action → measurable result" format. Vague criteria are auto-rejected and rewritten
+- Saves to `BRIEF.md` only after explicit approval
+
+**Why Scope OUT is mandatory:**
+People specify what to build but rarely specify what NOT to build. The skill's core value is forcing that conversation upfront.
+
+**Discard if:** bug fix, single-file change, or a spec is already written.
+
+---
+
+#### `/adr` — Architecture Decision Record
+
+Records a design or architecture decision with its context, choice, alternatives rejected, and consequences. Prevents re-litigating settled decisions and keeps future AI sessions aware of constraints not visible in code.
+
+**What it does:**
+- Captures: Context (the forcing function) / Decision / Alternatives Considered / Consequences / Override Conditions
+- Asks at most one clarifying question — gaps are filled with `[inferred]` annotation
+- Generates `docs/decisions/YYYY-MM-DD-<title>.md` after explicit approval
+- Does not fabricate alternatives — if none were seriously considered, it says so
+
+**Why it matters:**
+Future sessions — and future team members — need to understand what alternatives existed and why they were rejected, not just what was chosen. An ADR without "why" is a changelog entry.
+
+**Pair with `/brief`:**
+`/brief` locks scope before implementation. `/adr` records the non-obvious technical choices made during or after. Brief → implement → `/adr` for the decisions that aren't obvious from the code.
+
+---
+
+#### `/pre-push` — Pre-Push Quality Gate
 
 Mandatory pipeline that runs automatically before every `git push`. Blocks on secrets, test failures, and lint errors. Surfaces code review findings before they land in the remote.
 
@@ -203,7 +234,65 @@ Mandatory pipeline that runs automatically before every `git push`. Blocks on se
 
 ---
 
-### `/collab-audit` — AI Collaboration Audit
+### Session Management
+
+---
+
+#### `/session-start` — Session Open
+
+Loads saved session state and produces a concrete starting point within 60 seconds of invoking.
+
+**What it does:**
+- Reads `memory/session-handoff.md` (auto-loaded via frontmatter) — extracts Priority 1, open decisions, blockers, context notes
+- Reads `tasks/lessons.md` — flags any correction rules relevant to today's work
+- Spot-checks `memory/MEMORY.md` for 1–2 stale references (file paths, function names mentioned in handoff)
+- Promotes any `[ref:N≥3]` items from `memory/context-log.md` to MEMORY.md
+
+**Output format:**
+```
+## Session Ready
+Priority 1: [concrete next action]
+Priority 2: [if present]
+Open decisions: [list or "none"]
+Lessons flagged: [applicable rules or "none"]
+Memory alerts: [stale refs or "none"]
+```
+
+**Dominant variable:** Does the handoff contain "what to do next" or "what was done"? If it reads like a completion log, it was written wrong — flag this before proceeding.
+
+**Discard if:** first session on the project (no handoff file), user says "start fresh."
+
+---
+
+#### `/session-checkpoint` — Session Close
+
+Saves session state before context compaction, task switching, or ending a session. Five-phase pipeline.
+
+**What it does:**
+- **Phase 1**: Extracts what context compression could destroy — open decisions, user priority signals, failed approaches
+- **Phase 1.5 (Entity Extraction)**: Classifies session content into four types: permanent facts (→ MEMORY.md), episode entries (→ context-log.md with TTL), raw observations (→ lessons.md candidates), stale detections (→ immediate MEMORY.md update)
+- **Phase 2**: Rewrites `memory/session-handoff.md` — removes completed items, adds new items, forward-looking only (max 200 lines)
+- **Phase 3**: Saves classified entities to their respective memory files
+- **Phase 4**: Preservation checklist — 5 items, any NO blocks compact guidance
+- **Phase 5**: Tells user to run `/compact`
+
+**TTL system for context log:**
+- `ttl:permanent` — decisions, architecture changes
+- `ttl:90d` — completions, plans, external events
+- `ttl:30d` — temporary states, short-lived issues
+
+**Why the handoff stays small:**
+Completed items are deleted, not archived. Git history preserves them. A handoff that lists "what was done" is a changelog — not a starting point.
+
+**Discard if:** no code changes and no open decisions this session. `/compact` is a Claude Code CLI built-in — this skill cannot call it directly.
+
+---
+
+### Quality & Reflection
+
+---
+
+#### `/collab-audit` — AI Collaboration Audit
 
 Analyzes your conversation history and work patterns across 13 sections to generate a behavioral diagnosis report. No surveys. Observation only.
 
@@ -237,23 +326,26 @@ AI amplifies your existing work patterns — good and bad. Most people don't kno
 # macOS / Linux
 SKILLS_DIR=~/.claude/skills
 
-mkdir -p $SKILLS_DIR/{brief,project-check,project-init,harness-init,team-init,pre-push/scripts,collab-audit}
+mkdir -p $SKILLS_DIR/{brief,adr,project-check,project-init,harness-init,team-init,pre-push/scripts,collab-audit,session-start,session-checkpoint}
 
-cp brief/SKILL.md           $SKILLS_DIR/brief/SKILL.md
-cp project-check/SKILL.md   $SKILLS_DIR/project-check/SKILL.md
-cp project-init/SKILL.md    $SKILLS_DIR/project-init/SKILL.md
-cp harness-init/SKILL.md    $SKILLS_DIR/harness-init/SKILL.md
-cp team-init/SKILL.md       $SKILLS_DIR/team-init/SKILL.md
-cp pre-push/SKILL.md        $SKILLS_DIR/pre-push/SKILL.md
+cp brief/SKILL.md                $SKILLS_DIR/brief/SKILL.md
+cp adr/SKILL.md                  $SKILLS_DIR/adr/SKILL.md
+cp project-check/SKILL.md        $SKILLS_DIR/project-check/SKILL.md
+cp project-init/SKILL.md         $SKILLS_DIR/project-init/SKILL.md
+cp harness-init/SKILL.md         $SKILLS_DIR/harness-init/SKILL.md
+cp team-init/SKILL.md            $SKILLS_DIR/team-init/SKILL.md
+cp pre-push/SKILL.md             $SKILLS_DIR/pre-push/SKILL.md
 cp pre-push/scripts/scan_secrets.pl $SKILLS_DIR/pre-push/scripts/scan_secrets.pl
-cp collab-audit/SKILL.md    $SKILLS_DIR/collab-audit/SKILL.md
+cp collab-audit/SKILL.md         $SKILLS_DIR/collab-audit/SKILL.md
+cp session-start/SKILL.md        $SKILLS_DIR/session-start/SKILL.md
+cp session-checkpoint/SKILL.md   $SKILLS_DIR/session-checkpoint/SKILL.md
 ```
 
 ```bat
 :: Windows
 set SKILLS=%USERPROFILE%\.claude\skills
-for %d in (brief project-check project-init harness-init team-init pre-push collab-audit) do mkdir "%SKILLS%\%d" 2>nul
-for %d in (brief project-check project-init harness-init team-init pre-push collab-audit) do copy %d\SKILL.md "%SKILLS%\%d\SKILL.md"
+for %d in (brief adr project-check project-init harness-init team-init pre-push collab-audit session-start session-checkpoint) do mkdir "%SKILLS%\%d" 2>nul
+for %d in (brief adr project-check project-init harness-init team-init pre-push collab-audit session-start session-checkpoint) do copy %d\SKILL.md "%SKILLS%\%d\SKILL.md"
 mkdir "%SKILLS%\pre-push\scripts" 2>nul
 copy pre-push\scripts\scan_secrets.pl "%SKILLS%\pre-push\scripts\scan_secrets.pl"
 ```
@@ -261,13 +353,16 @@ copy pre-push\scripts\scan_secrets.pl "%SKILLS%\pre-push\scripts\scan_secrets.pl
 Invoke in any Claude Code session:
 
 ```
-/brief            # lock scope before implementation — Goal / Scope IN+OUT / Exit Criteria
-/project-check    # audit an existing project (read-only)
-/project-init     # scaffold a new project
-/harness-init     # set up Claude Code agent infrastructure
-/team-init        # assemble your coding agent team
-/pre-push         # run before git push (also triggers automatically on push requests)
-/collab-audit     # diagnose your AI collaboration patterns (2+ sessions or 100+ messages)
+/brief                # lock scope before implementation
+/adr                  # record a design decision (after it's made)
+/project-check        # audit an existing project (read-only)
+/project-init         # scaffold a new project
+/harness-init         # set up Claude Code agent infrastructure
+/team-init            # assemble your coding agent team
+/pre-push             # run before git push
+/collab-audit         # diagnose your AI collaboration patterns
+/session-start        # open a session — load handoff + lessons
+/session-checkpoint   # close a session — save state before /compact
 ```
 
 ---
@@ -279,7 +374,7 @@ Invoke in any Claude Code session:
 /project-check → Score N/10 + gap list
   ├─ gaps found → /project-init (Update mode) + /harness-init + /team-init
   └─ score ≥ 8  → only fix the ⚠ items
-then: use /pre-push on every git push going forward
+then: session-start + session-checkpoint as daily bookends
 ```
 
 **New project — start here:**
@@ -288,22 +383,34 @@ then: use /pre-push on every git push going forward
 /harness-init    → rules/ + hooks + memory/ + agent routing
 /team-init       → orchestrator + code-reviewer + verification + ...
 /project-check   → verify everything landed correctly
-/pre-push        → active on every subsequent push
 ```
 
-The seven skills map to the full project lifecycle:
+**Daily session loop:**
+```
+/session-start       → load context, flag lessons, ready signal
+/brief               → before each feature (scope OUT mandatory)
+  implement
+/adr                 → after non-obvious design choices
+/pre-push            → before every git push
+/session-checkpoint  → at session end, before /compact
+```
 
-| Phase | Skill | Frequency | Benefit |
-|-------|-------|-----------|---------|
-| Diagnose | `/project-check` | On-demand | Know exactly what's broken before you touch anything — ordered by severity |
-| Bootstrap | `/project-init` | Once | Hard Rules locked before the first line of code; retrofitting them costs more later |
-| Wire AI | `/harness-init` | Once | Every future session starts with full context — no re-explaining conventions |
-| Build team | `/team-init` | Once | Implementation drift is caught automatically; you see escalations, not every subagent output |
-| **Lock scope** | **`/brief`** | **Before each feature** | **Scope OUT defined before code starts — "this too" additions get blocked at the gate, not mid-sprint** |
-| **Ship daily** | **`/pre-push`** | **Every push** | **Secrets, tests, and critical review findings blocked before they land in remote** |
-| Reflect | `/collab-audit` | Periodic | Work pattern blind spots surfaced with evidence — not self-report |
+The ten skills map to the full project lifecycle:
 
-> **Standalone use:** Each skill works independently. `/pre-push` works on any project — it auto-detects the language and only runs relevant checks.
+| Phase | Category | Skill | Frequency | Benefit |
+|-------|----------|-------|-----------|---------|
+| Diagnose | Setup | `/project-check` | On-demand | Know exactly what's broken before you touch anything |
+| Bootstrap | Setup | `/project-init` | Once | Hard Rules locked before the first line of code |
+| Wire AI | Setup | `/harness-init` | Once | Every future session starts with full context |
+| Build team | Setup | `/team-init` | Once | Implementation drift caught automatically |
+| **Lock scope** | **Workflow** | **`/brief`** | **Before each feature** | **Scope OUT defined before code starts** |
+| **Record decisions** | **Workflow** | **`/adr`** | **After key choices** | **Future sessions know why, not just what** |
+| **Ship daily** | **Workflow** | **`/pre-push`** | **Every push** | **Secrets, tests, critical findings blocked before remote** |
+| **Open session** | **Session** | **`/session-start`** | **Every session** | **Priority 1 in 60 seconds, lessons loaded** |
+| **Close session** | **Session** | **`/session-checkpoint`** | **Every session** | **Nothing lost to context compression** |
+| Reflect | Quality | `/collab-audit` | Periodic | Work pattern blind spots surfaced with evidence |
+
+> **Standalone use:** Each skill works independently. `/pre-push` works on any project — it auto-detects the language and only runs relevant checks. `/session-start` and `/session-checkpoint` work on any project that has `memory/session-handoff.md` (generated by `/harness-init`).
 
 ---
 
@@ -311,38 +418,41 @@ The seven skills map to the full project lifecycle:
 
 | Skill | Use when… |
 |-------|-----------|
-| `/brief` | You're about to implement a feature and the requirements feel open-ended. Also: when a previous feature grew mid-sprint — run brief before the next one. |
-| `/project-check` | You inherited a repo and want to know the setup state. Or: you just ran `/project-init` and want to verify it landed. Also: run periodically when something keeps breaking at the infrastructure level. |
-| `/project-init` | Starting a new codebase. Or: you have code but no `CLAUDE.md`, no `ROADMAP`, no `.gitignore`. Also: handing a project to AI for the first time. |
-| `/harness-init` | First Claude Code session on a project. Or: you keep re-explaining conventions at every session start. Run after `/project-init`. |
-| `/team-init` | You want drift detection without reviewing every subagent output yourself. Or: your orchestrator was built manually and has no correction loop. Run after `/harness-init`. |
-| `/pre-push` | Before every `git push`. Set it as a habit trigger — "I type `git push`, I run this first." Also useful for onboarding: run it once to show a new contributor what the baseline looks like. |
-| `/collab-audit` | After 2+ weeks of active use. Or: sessions are getting less productive and you can't pinpoint why. Run monthly with `compare` mode to see what shifted. |
+| `/brief` | You're about to implement a feature and requirements feel open-ended. Also: when a previous feature grew mid-sprint — run brief before the next one. |
+| `/adr` | A design decision was just made and it's not obvious from the code why. Also: when you find yourself explaining the same choice repeatedly to AI sessions. |
+| `/project-check` | You inherited a repo and want to know the setup state. Or: run periodically when something keeps breaking at the infrastructure level. |
+| `/project-init` | Starting a new codebase. Or: you have code but no `CLAUDE.md`, no `ROADMAP`, no `.gitignore`. |
+| `/harness-init` | First Claude Code session on a project. Or: you keep re-explaining conventions at every session start. |
+| `/team-init` | You want drift detection without reviewing every subagent output yourself. |
+| `/pre-push` | Before every `git push`. Set it as a habit trigger — "I type `git push`, I run this first." |
+| `/collab-audit` | After 2+ weeks of active use. Or: sessions are getting less productive and you can't pinpoint why. |
+| `/session-start` | At the start of every session where prior work exists. Especially: after a break, after switching tasks, after a long session the day before. |
+| `/session-checkpoint` | Before running `/compact`, switching major tasks, or ending a session. Whenever you want the next session to start with full context. |
 
 ---
 
-## v3 Design Principles
+## v4 Design Principles
 
-Every skill in v3 encodes three things:
+Every skill in v4 encodes three things:
 
 - **Dominant variable** — the single factor that most determines whether the skill output is useful. Named explicitly so you know what to optimize for.
-- **Discard condition** — when NOT to use the skill. A diagnostic that runs itself when it shouldn't is worse than useless.
+- **Discard condition** — when NOT to use the skill. A skill that runs itself when it shouldn't is worse than useless.
 - **Invariants with consequences** — rules that cannot be overridden, with explicit failure mode documented for each one.
 
-These came from painful experience on a large production system:
+**New in v4 — Session lifecycle as a first-class concern:**
 
-- **CLAUDE.md before code** — re-explaining context every session is expensive
-- **Hard Rules from day one** — retrofitting them means existing code may already be in violation
-- **Security findings never buried** — a credential warning hidden below infrastructure gaps gets ignored
-- **Scale-aware warnings** — a 5-file script failing "no ROADMAP" is noise, not signal
-- **Harness before agents** — the orchestration layer determines session productivity
-- **Orchestrator catches drift** — auto-correct twice, then escalate. Don't waste human attention on recoverable issues
-- **Skip existing agents** — the user's customizations are sacred, never overwrite
-- **Feature flags default OFF** — unfinished features affecting default behavior makes debugging painful
-- **Merge, never overwrite** — destroying existing settings.json configs is catastrophic
-- **Tier 0 rules are immutable** — no agent or skill can override them
-- **Scan added lines only** — blocking a commit that removes a secret is counterproductive
-- **Direct lint before AI lint** — static tools are deterministic and free; save AI tokens for what grep can't catch
+The session open/close pair (`/session-start` + `/session-checkpoint`) addresses the single biggest productivity leak in AI-assisted development: context loss. Each session starts cold — you re-explain conventions, re-locate where you left off, and lose the first 10 minutes rebuilding mental model. The session lifecycle skills eliminate this by making handoff and context loading a structured habit rather than an afterthought.
+
+**The memory layer (used by session skills):**
+
+```
+memory/MEMORY.md              ← permanent facts (file paths, architecture decisions)
+memory/session-handoff.md     ← current session incomplete items (forward-looking only)
+memory/context-log.md         ← dated events with TTL (completions, plans, decisions)
+tasks/lessons.md              ← AI behavior correction rules (Boris Cherny pattern)
+```
+
+Each file has a specific role. `/session-checkpoint` writes to all four. `/session-start` reads from three and writes to one (MEMORY.md, on stale detection only).
 
 ---
 
@@ -355,10 +465,19 @@ These came from painful experience on a large production system:
 - [x] `/pre-push` — pre-push quality gate (secrets + tests + lint + AI review)
 - [x] `/collab-audit` — AI collaboration pattern diagnosis (13 sections, observation-only)
 - [x] `/brief` — scope locking before implementation (Scope OUT mandatory, Exit Criteria action+result format)
+- [x] `/adr` — architecture decision record (context mandatory, no fabricated alternatives, override conditions required)
+- [x] `/session-start` — session open (load handoff + lessons + memory spot-check → ready signal)
+- [x] `/session-checkpoint` — session close (entity extraction + handoff rewrite + memory save + preservation check)
 
 ---
 
 ## Changelog
+
+### v4.0 — Session lifecycle + Decision records (2026-04-13)
+- Added `/session-start` — session open skill. Loads handoff + lessons, spot-checks memory, produces Priority 1 ready signal within 60 seconds. Pair with `/session-checkpoint`.
+- Added `/session-checkpoint` — session close skill. 5-phase pipeline: deep extraction → entity classification (permanent facts / episode entries / lessons candidates / stale detection) → handoff rewrite → memory save → preservation checklist → compact guidance. TTL system: `ttl:permanent` | `ttl:90d` | `ttl:30d`.
+- Added `/adr` — Architecture Decision Record. Records context (forcing function), decision, alternatives considered, consequences, and override conditions. Fabricated alternatives explicitly forbidden. Pairs with `/brief`.
+- README restructured into 4 categories: Project Setup / Daily Workflow / Session Management / Quality & Reflection.
 
 ### v3.6 — Scope locking (2026-04-12)
 - Added `/brief` — scope locking before implementation. Scope OUT mandatory (min 2 items, plausible extensions only). Exit Criteria require observable action + measurable result format — vague criteria auto-rejected. Conservative minimum scope floor: one complete user flow + one user-visible outcome. 7 invariants.
@@ -373,7 +492,6 @@ These came from painful experience on a large production system:
 ### v3.4 — Defense structure upgrade (2026-04-11)
 - All 6 skills: added **Rationalization Table** (common rationalization patterns + rebuttals)
 - `pre-push`: added **Dominant variable**, **Discard if**, **Invariants with consequences**, **Scope Boundary** — format now consistent with the rest of the suite
-- `project-check/init/harness-init/team-init`: Rationalization Table (5 entries each)
 
 ### v3.3 — AI Collaboration Audit (2026-04-11)
 - Added `/collab-audit` — 13-section behavioral diagnosis from conversation observation. Compare mode, gitignore protection, observation-only (no surveys).
