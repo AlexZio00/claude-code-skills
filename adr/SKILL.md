@@ -34,7 +34,7 @@ Ask **at most one clarifying question** — if more than one gap exists, apply b
 Produce in this exact format:
 
 ```markdown
-# [Short Title — noun phrase, e.g. "Use SQLite for local market data cache"]
+# MAGIC DOC: [Short Title — noun phrase, e.g. "Use SQLite for local market data cache"]
 
 **Date:** YYYY-MM-DD  
 **Status:** Accepted  

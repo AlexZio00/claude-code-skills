@@ -2,6 +2,7 @@
 name: project-check
 description: "Existing project health scan — audits Infrastructure, Security, Quality, and Harness setup. Read-only. Use when: '/project-check', '프로젝트 점검', '뭐가 부족해', '기존 프로젝트 확인', 'project health check', 'project audit', '내 프로젝트 분석해줘', '설정 점검'. Ends with /project-init and /harness-init recommendations. NOT for new projects (use /project-init)."
 user_invocable: true
+tools: Read, Bash, Glob, Grep
 ---
 
 # Project Check — Existing Project Health Scan

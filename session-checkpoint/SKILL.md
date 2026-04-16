@@ -27,11 +27,16 @@ Has **what the next session must know** been clearly identified? If that identif
 
 ## Phase 1: Deep Context Extraction
 
-Extract what compact could destroy:
+Extract what compact could destroy. Full Compact preserves these 9 categories — cover all that apply:
 
 - **Open decisions** — discussed but not resolved
+- **Current work state** — what is in-progress right now (file, function, where you left off)
 - **User priority signals** — what was emphasized, repeated, or caused friction → save as feedback memory
+- **Key tech concepts** — new patterns, APIs, architecture insights discovered this session
+- **File paths + code snippets** — specific files modified, function names, critical code fragments (compact loses these)
+- **Errors + fixes** — error messages encountered and how they were resolved
 - **Current mental model** — code flow, bug causation, failed approaches and why they failed
+- **Next steps** — concrete actions for next session (with commands if applicable)
 - **Dead ends** — approaches tried and abandoned this session (prevent repetition next session)
 
 ---
@@ -127,6 +132,8 @@ Any NO → fix before proceeding.
 ---
 
 ## Phase 5: Compact Guidance
+
+> ⚠ **NO_TOOLS mode**: `/compact` disables all tools during compression — no file reads or writes occur. All Phase 1–4 data must be persisted to files BEFORE running `/compact`.
 
 `/compact` is a Claude Code CLI built-in — this skill cannot call it directly.
 After passing the checklist, tell the user:

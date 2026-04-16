@@ -578,6 +578,9 @@ For each response:
 
 After haiku pass: re-run the most critical scenario with model: "sonnet" (spot-check).
 
+**Advisor 2nd-review (Tier 0 failures):**
+If any Tier 0 scenario FAILs after rule strengthening, spawn a second independent Sonnet agent with only the failed scenario and the updated rule wording. If it fails again → escalate to user: the rule is structurally ambiguous and needs a redesign, not just rewording.
+
 Save passing scenarios to `docs/harness-tests.md` for regression use.
 
 ### 4-3. Completeness Check

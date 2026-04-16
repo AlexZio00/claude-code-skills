@@ -20,6 +20,8 @@ metadata:
 
 > ⛔ **BLOCKING REQUIREMENT**: Complete this pipeline and resolve all Critical/High issues BEFORE executing `git push`.
 
+> **YOLO auto-approve**: `git diff`, `git status`, `git branch`, `git log` (read-only ops) are auto-approved without a permission prompt. `git push` is a write operation — it only runs after all gates pass.
+
 ## Step 1: Assess & Scan
 
 Run everything in **one bash call** — variables share the same shell session, so `$STAGED_DIFF` is reused for the secrets scan without a second `git diff` invocation.

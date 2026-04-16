@@ -84,6 +84,8 @@ user_invocable: true
    date: YYYY-MM-DD
    language: [ko|en]
    ---
+
+   # MAGIC DOC: AI Collaboration Audit YYYY-MM-DD
    ```
 2. `~/.claude/collab-audits/YYYY-MM-DD.md`에 저장한다.
    - 같은 날 재실행 시: `-2.md` suffix (덮어쓰기 금지)

@@ -20,6 +20,8 @@ Convert a vague feature idea or request into a locked, implementation-ready brie
 
 ### Step 1: Mode Detection
 
+> **Caching note** — project structure scan (Step 1) is static context (cacheable across sessions). Steps 2–5 are dynamic (user-input driven). For large projects, Step 1 results can be reused if the stack hasn't changed.
+
 Determine the project context:
 
 - **Existing project**: `CLAUDE.md`, `package.json`, `pyproject.toml`, or similar exists in cwd → run a quick scan: Glob project root 2 levels deep for structure + top-level folder names as heuristic (e.g. `auth/`, `api/`, `components/`), then Grep for request keywords — select at most 10 files. Relevance = request keywords appear directly in filename or file content. Do not infer relevance; keyword or filename match only. Extract: stack, existing patterns, components that will be touched.

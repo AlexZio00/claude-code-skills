@@ -17,6 +17,8 @@ Load saved session state and produce a concrete starting point. The goal is to a
 - User says "start fresh" or "ignore context" → skip
 - Quick one-off question unrelated to ongoing work → skip
 
+> **Auto-trigger signal**: If ≥5,000 tokens accumulated AND ≥3 tool calls AND ≥24h since last session — high-value context is at risk. Run this skill before starting new work (Triple Gate pattern).
+
 ---
 
 ## Phase 1: Load Handoff

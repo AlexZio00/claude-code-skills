@@ -1,4 +1,4 @@
-# claude-code-skills v4.0
+# claude-code-skills v4.1
 
 Audit what's broken. Scaffold what's missing. Wire the AI. Assemble the team. Lock scope. Record decisions. Open sessions right. Close sessions right. Ship with confidence. Diagnose how you work.
 
@@ -258,6 +258,8 @@ Lessons flagged: [applicable rules or "none"]
 Memory alerts: [stale refs or "none"]
 ```
 
+**Auto-trigger (Triple Gate):** ≥5,000 tokens accumulated AND ≥3 tool calls AND ≥24h since last session → high-value context is at risk. Run this skill before starting new work.
+
 **Dominant variable:** Does the handoff contain "what to do next" or "what was done"? If it reads like a completion log, it was written wrong — flag this before proceeding.
 
 **Discard if:** first session on the project (no handoff file), user says "start fresh."
@@ -269,12 +271,14 @@ Memory alerts: [stale refs or "none"]
 Saves session state before context compaction, task switching, or ending a session. Five-phase pipeline.
 
 **What it does:**
-- **Phase 1**: Extracts what context compression could destroy — open decisions, user priority signals, failed approaches
+- **Phase 1**: Extracts what context compression could destroy — 9 categories: pending tasks, current state, session intent, key technical concepts, critical file snippets, active errors, important user messages, next steps, and problem-solving process
 - **Phase 1.5 (Entity Extraction)**: Classifies session content into four types: permanent facts (→ MEMORY.md), episode entries (→ context-log.md with TTL), raw observations (→ lessons.md candidates), stale detections (→ immediate MEMORY.md update)
 - **Phase 2**: Rewrites `memory/session-handoff.md` — removes completed items, adds new items, forward-looking only (max 200 lines)
 - **Phase 3**: Saves classified entities to their respective memory files
 - **Phase 4**: Preservation checklist — 5 items, any NO blocks compact guidance
-- **Phase 5**: Tells user to run `/compact`
+- **Phase 5**: Warns that `/compact` disables ALL tools during compression — state must be saved before compaction, not during. Then tells user to run `/compact`.
+
+> **NO_TOOLS warning:** `/compact` runs with no tool access. Any state not written to disk before this phase is lost. Phases 2–3 are the save gates.
 
 **TTL system for context log:**
 - `ttl:permanent` — decisions, architecture changes
@@ -439,6 +443,15 @@ Every skill in v4 encodes three things:
 - **Discard condition** — when NOT to use the skill. A skill that runs itself when it shouldn't is worse than useless.
 - **Invariants with consequences** — rules that cannot be overridden, with explicit failure mode documented for each one.
 
+**Added in v4.1 — Prompt rules are advisory. Physical constraints are mandatory:**
+
+Four new patterns applied across all skills in v4.1:
+
+- **`tools:` frontmatter** — read-only skills and agents now declare `tools: Read, Bash, Glob, Grep` (or similar) in frontmatter. Claude Code physically removes Edit/Write from the tool list. Prompt-level "don't modify files" can be rationalized away; tool absence cannot.
+- **STATIC/DYNAMIC boundary** — each workflow step is tagged as static (cacheable project structure, query templates) or dynamic (user input, live data). Separating these tells Claude Code what to preserve across sessions vs. what to re-run.
+- **MagicDocs pattern** — output files written by skills use `# MAGIC DOC: [title]` as their heading. Claude Code recognizes this and auto-updates the file content during conversations without being explicitly asked.
+- **YOLO classifier** — read-only operations (`git diff`, `git status`, file reads) are explicitly marked as auto-approvable. Reduces permission prompts for operations with no side-effects.
+
 **New in v4 — Session lifecycle as a first-class concern:**
 
 The session open/close pair (`/session-start` + `/session-checkpoint`) addresses the single biggest productivity leak in AI-assisted development: context loss. Each session starts cold — you re-explain conventions, re-locate where you left off, and lose the first 10 minutes rebuilding mental model. The session lifecycle skills eliminate this by making handoff and context loading a structured habit rather than an afterthought.
@@ -472,6 +485,18 @@ Each file has a specific role. `/session-checkpoint` writes to all four. `/sessi
 ---
 
 ## Changelog
+
+### v4.1 — Physical constraints + Prompt architecture patterns (2026-04-16)
+
+Four patterns from Claude Code internals applied across the full skill suite:
+
+- **`tools:` frontmatter** (`project-check`): physical tool scope enforcement — read-only skills declare allowed tools in frontmatter. Edit/Write are absent from the tool list entirely, not just prohibited by prompt instruction.
+- **STATIC/DYNAMIC boundary** (`brief`): project structure scan in Step 1 is explicitly marked as static/cacheable context. Steps 2–5 are dynamic. Reduces redundant re-scanning across sessions.
+- **Triple Gate auto-trigger** (`session-start`): added auto-trigger signal — ≥5,000 tokens AND ≥3 tool calls AND ≥24h since last session → run session-start before new work. Prevents silent context loss.
+- **NO_TOOLS warning + 9-item expansion** (`session-checkpoint`): Phase 1 extraction expanded to 9 items (was 5). Phase 5 now explicitly warns that `/compact` disables all tools — state must be written before compaction begins, not during.
+- **YOLO classifier** (`pre-push`): read-only git ops (`git diff`, `git status`, `git log`) explicitly marked as auto-approvable without permission prompt. Write ops still gated.
+- **Advisor 2nd-review block** (`harness-init`): generated harness now includes Advisor configuration — routes APPROVE decisions to a stronger model for confirmation before finalizing.
+- **MagicDocs** (`adr`, `collab-audit`): generated output files now use `# MAGIC DOC: [title]` heading. Claude Code auto-updates these files during conversations.
 
 ### v4.0 — Session lifecycle + Decision records (2026-04-13)
 - Added `/session-start` — session open skill. Loads handoff + lessons, spot-checks memory, produces Priority 1 ready signal within 60 seconds. Pair with `/session-checkpoint`.
