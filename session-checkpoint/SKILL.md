@@ -1,8 +1,8 @@
 ---
 name: session-checkpoint
-description: "Saves session state before context compaction, task switching, or ending a session. Triggers: '/session-checkpoint', 'checkpoint', 'compact', 'save progress', 'end session', 'handoff', 'save session'. Runs 5-phase pipeline: context extraction → entity classification → handoff write → memory save → preservation check → compact guidance."
+description: "Saves session state before context compaction, task switching, or ending a session. Triggers: '/session-checkpoint', 'checkpoint', 'compact', 'save progress', 'end session', 'handoff', '체크포인트', '핸드오프 저장', '컴팩트 전에', '세션 저장', '세션 체크포인트'. Runs 5-phase pipeline: context extraction → entity classification → handoff write → memory save → preservation check → compact guidance."
 user_invocable: true
-context: !cat memory/session-handoff.md
+context: !cat memory/session-handoff-LATEST.md
 ---
 
 # Session Checkpoint
@@ -13,12 +13,12 @@ Has **what the next session must know** been clearly identified? If that identif
 ## Discard If
 - No code changes and no open decisions this session → compact not needed
 - Already ran checkpoint this session → skip, no duplicate
-- Only want to update the handoff file directly → edit `memory/session-handoff.md` manually
+- Only want to update the handoff file directly → edit `memory/session-handoff-LATEST.md` manually
 
 ---
 
 ## Core Principles
-- Handoff is a **single file** (`memory/session-handoff.md`) — no version numbers
+- Handoff is a **single file** (`memory/session-handoff-LATEST.md`) — no version numbers
 - Completed items get **deleted**, not archived
 - The next session must be able to start from this file alone
 - Preservation check before compact — always
@@ -41,7 +41,11 @@ Extract what compact could destroy. Full Compact preserves these 9 categories �
 
 ---
 
-## Phase 1.5: Entity Extraction
+## Phase 1.5: Entity Extraction (Dream Cycle pattern)
+
+> **Triple Gate auto-trigger** (autoDream pattern, ch13):
+> Accumulated tokens ≥ 5,000 AND tool calls ≥ 3 AND ≥ 24h since last checkpoint
+> → When all three conditions hit simultaneously, auto-execute is recommended. Same criteria apply on manual invocation.
 
 Scan the session conversation for four entity types:
 
@@ -68,7 +72,7 @@ Scan the session conversation for four entity types:
 
 ## Phase 2: Write Handoff (single file update)
 
-File: `memory/session-handoff.md`
+File: `memory/session-handoff-LATEST.md`
 
 ### Rules
 1. **Read the previous handoff first** (auto-loaded above) — remove completed items
@@ -83,6 +87,10 @@ File: `memory/session-handoff.md`
 1. [most urgent] — include the exact command or step to start
 2. [next]
 
+## Current Work State  ← Full Compact 2nd priority required
+- In-progress work: [file, function, where you left off]
+- Omit section if nothing in-progress
+
 ## Open Decisions
 - [topic]: [options] — user lean: [if known]
 
@@ -92,9 +100,11 @@ File: `memory/session-handoff.md`
 ## Context Notes (needed next session)
 - [important causation discovered this session]
 - [approaches tried and failed — do not repeat]
+- [critical file paths and function names — for post-compact recovery]
 
 ## Current Focus
 - Top priority: [what]
+- Friction: [what]
 ```
 
 ### Forbidden
@@ -114,6 +124,7 @@ Apply Phase 1.5 extraction results to files:
    - Stale items (contradicted by current state) → fix immediately
 2. **`memory/context-log.md`** — append episode entries (date + TTL + ref:0 format required)
 3. **`tasks/lessons.md`** — add behavior correction rules triggered this session (only if a real mistake occurred)
+4. Remove references to old handoff filenames in MEMORY.md index; unify to LATEST.
 
 ---
 
@@ -138,7 +149,7 @@ Any NO → fix before proceeding.
 `/compact` is a Claude Code CLI built-in — this skill cannot call it directly.
 After passing the checklist, tell the user:
 
-"Checkpoint complete. Run `/compact` to compress context. Handoff: `memory/session-handoff.md`"
+"Checkpoint complete. Run `/compact` to compress context. Handoff: `memory/session-handoff-LATEST.md`"
 
 ---
 
@@ -155,7 +166,7 @@ After passing the checklist, tell the user:
 
 ## Invariants (never violate)
 
-1. **Single handoff file**: only `memory/session-handoff.md` exists. No versioned files (`session-handoff-v2.md` etc.). Violation → next session cannot determine which file is current, context recovery fails.
+1. **Single handoff file**: only `memory/session-handoff-LATEST.md` exists. No versioned files (`session-handoff-v2.md` etc.). Violation → next session cannot determine which file is current, context recovery fails.
 
 2. **Forward-looking only**: handoff must not list "what was done this session." Only "what to do next session." Violation → handoff becomes a changelog and the actual starting point is lost.
 
@@ -165,7 +176,7 @@ After passing the checklist, tell the user:
 
 ## Output
 
-- **`memory/session-handoff.md`** — incomplete items + open decisions + remaining issues only. Max 200 lines.
+- **`memory/session-handoff-LATEST.md`** — incomplete items + open decisions + remaining issues only. Max 200 lines.
 - **Memory files** — MEMORY.md updated for new/stale items (if applicable)
 - **Conversation** — compact readiness confirmation + `/compact` instruction
 
