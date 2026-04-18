@@ -70,6 +70,46 @@ Scan the session conversation for four entity types:
 
 ---
 
+## Phase 1.6: Task-to-Skill Crystallization (GenericAgent pattern)
+
+> **Purpose**: propose auto-promotion of repeated workflows into a skill. The point where "manual repetition 3 times" converts into "one skill call".
+> **Origin**: GenericAgent — task execution crystallization pattern.
+
+Scan this session's tool calls and user messages for **repeated workflow signatures**.
+
+**Signature definition:**
+Three elements of the same workflow must be similar:
+1. **Intent** — user request type (review / analyze / verify / generate / deploy)
+2. **Tool Sequence** — executed tool-call pattern (e.g., Read → Grep → Edit → Bash test)
+3. **Output Shape** — final deliverable form (report / code change / file creation)
+
+**Crystallization triggers (either one):**
+- **Within-session repetition**: same signature executed **≥ 3 times** this session
+- **Cross-session accumulation**: `[ref:N]` in `memory/context-log.md` for the same task type ≥ 5
+
+**Output format when triggered:**
+```
+[Crystallization candidate detected]
+- Signature: {Intent} + {Tool Sequence} + {Output Shape}
+- Frequency: {N} this session / {M} accumulated
+- Suggestion: promote this workflow into a new skill (use your skill-authoring workflow of choice)
+- Proposed skill name: {snake_case_name}
+- Proposed triggers: {Korean + English trigger phrases — 3 examples}
+```
+
+**Non-trigger conditions (skip crystallization):**
+- One-off exploration (single Glob → Read)
+- Signature duplicates an existing skill — scan `~/.claude/skills/*/SKILL.md` to confirm
+- Signature is too generic → would collide with an already-established skill
+
+**Promotion workflow:**
+Propose only. Never author the skill automatically.
+If user approves ("yes" / "ㅇㅇ" / "approve" / "make it") → hand off to the user's skill-authoring workflow.
+If user declines ("no" / "pass" / "skip") → drop proposal, log to `tasks/lessons.md`:
+`[YYYY-MM-DD] crystallization candidate rejected: {signature} — reason required`
+
+---
+
 ## Phase 2: Write Handoff (single file update)
 
 File: `memory/session-handoff-LATEST.md`
@@ -161,6 +201,7 @@ After passing the checklist, tell the user:
 | Update MEMORY.md with new/stale items | Write code or implement features |
 | Run Phase 1–5 preservation checklist | Call `/compact` directly (CLI only) |
 | Maintain single handoff file | Create versioned handoff files (v1, v2…) |
+| Propose Crystallization candidates (Phase 1.6) | Author a new skill automatically (only after user approval + explicit handoff) |
 
 ---
 
@@ -171,6 +212,8 @@ After passing the checklist, tell the user:
 2. **Forward-looking only**: handoff must not list "what was done this session." Only "what to do next session." Violation → handoff becomes a changelog and the actual starting point is lost.
 
 3. **No compact guidance before preservation check**: if any Phase 4 item is NO, do not tell the user to run `/compact`. Violation → incomplete work is lost in compression.
+
+4. **Crystallization proposes only, never executes**: when Phase 1.6 detects a repeated workflow, it only suggests promotion. Automatic skill creation is forbidden — user must explicitly invoke their skill-authoring workflow. Violation → unnecessary skills generated from raw workflows pollute the library.
 
 ---
 
@@ -190,6 +233,8 @@ After passing the checklist, tell the user:
 | "Phase 4 has one NO but it's probably fine..." | Invariant 3. The checklist exists precisely for this moment. NO state → do not guide compact. |
 | "I'll save it as session-handoff-v2.md so we keep the old one too" | Invariant 1 violation. Git history keeps old versions. Versioned files cause "which one is current?" confusion that breaks context recovery. |
 | "The session was short, Phase 1.5 isn't worth running" | Phase 1.5 takes 2 minutes. Missing one permanent fact means next session re-discovers it. Run it. |
+| "Phase 1.6 detected a repetition — let me just author the skill right now" | Invariant 4 violation. User must judge whether the task will actually repeat. Auto-promotion turns one-off exploration into skills, polluting the library. Propose only. |
+| "A repeated workflow was detected but the signature is too trivial, skip it" | If it matches Phase 1.6's "non-trigger conditions," fine. But dismissing 3+ repetitions as "trivial" is usually measurement laziness. Log it to `context-log.md [ref:N]` so the next session re-evaluates. |
 
 ---
 
