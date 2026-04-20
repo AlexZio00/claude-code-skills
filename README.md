@@ -1,4 +1,4 @@
-# claude-code-skills v4.3
+# claude-code-skills v4.4
 
 Audit what's broken. Scaffold what's missing. Wire the AI. Assemble the team. Lock scope. Record decisions. Open sessions right. Close sessions right. Ship with confidence. Diagnose how you work.
 
@@ -63,6 +63,8 @@ Most projects have gaps they don't know about — missing Hard Rules, hardcoded 
 
 **Scale-aware:** A 5-file script won't fail for missing ROADMAP. Warnings are calibrated to project size.
 
+**In production:** Run before each sprint on a 200+ file codebase. Consistently surfaces: coverage gaps in new modules, missing .env.example entries, stale docs after refactors.
+
 ---
 
 #### `/project-init` — New Project Setup Interview
@@ -81,6 +83,8 @@ Conversational interview that generates `CLAUDE.md` + `DEVELOPMENT_ROADMAP.md` b
 Most projects skip the "invariants first" step. By the time you add Hard Rules, the codebase already violates them. This skill forces the conversation upfront.
 
 **Supports:** Python · TypeScript (Next.js / API) · Java · Kotlin (Spring Boot / Android) · Go · Rust · Swift
+
+**In production:** Initialized before the first line of domain code. The CLAUDE.md and .env.example structure generated here survived 4 months and 99K LOC with minimal changes.
 
 ---
 
@@ -118,6 +122,8 @@ The harness layer determines how productive every Claude Code session will be. B
 
 **Use this AFTER `/project-init`** — project-init scaffolds the codebase, harness-init scaffolds the AI orchestration layer on top.
 
+**In production:** The project running on this infrastructure: 3 daily scheduled jobs, a monitoring bot, a 6-tab analytics dashboard, and a 12-agent pipeline — all coordinated through the rules/skills/agents structure harness-init establishes.
+
 ---
 
 #### `/team-init` — Agent Team Assembly
@@ -150,6 +156,8 @@ The orchestrator's correction loop catches implementation drift automatically �
 
 **Use this AFTER `/harness-init`** — harness-init sets the rules, team-init assembles the agents that work within those rules.
 
+**In production:** Bootstrapped a 12-agent pipeline with specialized roles across data, analysis, alerting, and reporting. The AGENTS.md files generated here are still the source of truth after 4 months.
+
 ---
 
 ### Daily Workflow
@@ -172,6 +180,8 @@ People specify what to build but rarely specify what NOT to build. The skill's c
 
 **Discard if:** bug fix, single-file change, or a spec is already written.
 
+**In production:** Used before every feature addition on a complex multi-agent codebase. Has prevented at least 3 cases of "built the right thing wrong" by forcing non-goals and definition-of-done up front.
+
 ---
 
 #### `/adr` — Architecture Decision Record
@@ -189,6 +199,8 @@ Future sessions — and future team members — need to understand what alternat
 
 **Pair with `/brief`:**
 `/brief` locks scope before implementation. `/adr` records the non-obvious technical choices made during or after. Brief → implement → `/adr` for the decisions that aren't obvious from the code.
+
+**In production:** 10+ decisions documented — each capturing a tradeoff that wasn't obvious months later. Most valuable in retrospect: why certain safety constraints are architectural rather than conventional.
 
 ---
 
@@ -232,6 +244,8 @@ Mandatory pipeline that runs automatically before every `git push`. Blocks on se
 
 **Installation note:** `scripts/scan_secrets.pl` must be co-located with `SKILL.md`. The scanner is called via `find ~/.claude -name "scan_secrets.pl"` so it works regardless of where you install the skill.
 
+**In production:** Running on a 99K LOC Python project, 1,326 tests, 200+ files. Every push goes through this gate — catches credential leaks, dependency drift, and logic errors before they reach main. 4+ months in production.
+
 ---
 
 ### Session Management
@@ -264,6 +278,8 @@ Memory alerts: [stale refs or "none"]
 
 **Discard if:** first session on the project (no handoff file), user says "start fresh."
 
+**In production:** Managing context across many sessions on a 12-agent system. Past 200 files, the handoff file became the difference between "pick up immediately" vs "20 min reconstructing state."
+
 ---
 
 #### `/session-checkpoint` — Session Close
@@ -289,6 +305,8 @@ Saves session state before context compaction, task switching, or ending a sessi
 Completed items are deleted, not archived. Git history preserves them. A handoff that lists "what was done" is a changelog — not a starting point.
 
 **Discard if:** no code changes and no open decisions this session. `/compact` is a Claude Code CLI built-in — this skill cannot call it directly.
+
+**In production:** Managing context across many sessions on a 12-agent system. Past 200 files, the handoff file became the difference between "pick up immediately" vs "20 min reconstructing state."
 
 ---
 
@@ -321,6 +339,8 @@ Psychological analysis and behavioral feedback are intentionally combined. Separ
 
 **Why it matters:**
 AI amplifies your existing work patterns — good and bad. Most people don't know which patterns are costing them until they see them documented with evidence.
+
+**In production:** Run periodically on a project where Claude Code has touched 200+ files over 4 months. Catches pattern drift — where early architectural decisions get quietly undermined as scale grows.
 
 ---
 
@@ -485,6 +505,10 @@ Each file has a specific role. `/session-checkpoint` writes to all four. `/sessi
 ---
 
 ## Changelog
+
+### v4.4 — In production reference cases (2026-04-20)
+
+All 10 SKILL.md files and README now include **"In production"** sections — concrete production context showing scale, duration, and what each skill actually catches in a real codebase. No new behavior changes; documentation only.
 
 ### v4.3 — Task-to-Skill Crystallization (2026-04-18)
 
