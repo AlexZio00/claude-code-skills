@@ -224,3 +224,10 @@ Sections always in this order:
 - **Read-only by design** — a health check that modifies files is a liability
 - **Ends with a path forward** — the report is only useful if it points to the next action
 - **File existence as proxy** — test file count is a structural signal; running tests is out of scope
+
+---
+
+## In production
+Run before each sprint on a 200+ file codebase.
+Consistently surfaces: coverage gaps in new modules,
+missing .env.example entries, stale docs after refactors.

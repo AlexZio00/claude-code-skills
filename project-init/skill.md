@@ -699,3 +699,10 @@ Any unchecked item → return to the relevant question.
 - **Explicit secrets policy** — one accidental `.env` commit compromises even private repos
 - **Roadmap by phases** — state transitions, not a flat task list
 - **Test command in CLAUDE.md** — hunting for it every new session adds up
+
+---
+
+## In production
+Initialized before the first line of domain code.
+The CLAUDE.md and .env.example structure generated here
+survived 4 months and 99K LOC with minimal changes.

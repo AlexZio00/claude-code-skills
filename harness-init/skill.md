@@ -691,3 +691,11 @@ When both exist, project-level rules extend (never weaken) global rules.
 - **Violation testing proves the harness works** — untested rules are decorative
 - **Higher tier always wins** — no agent can override Tier 0
 - **Project extends global, never weakens** — project rules add restrictions, never remove them
+
+---
+
+## In production
+The project running on this infrastructure:
+3 daily scheduled jobs, a monitoring bot, a 6-tab analytics
+dashboard, and a 12-agent pipeline — all coordinated through
+the rules/skills/agents structure harness-init establishes.

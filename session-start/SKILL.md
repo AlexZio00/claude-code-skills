@@ -139,3 +139,10 @@ This skill is the opening half of the session lifecycle.
 `/session-start` → work → `/session-checkpoint`
 
 Install both or install neither — designed as a pair.
+
+---
+
+## In production
+Managing context across many sessions on a 12-agent system.
+Past 200 files, the handoff file became the difference between
+"pick up immediately" vs "20 min reconstructing state."

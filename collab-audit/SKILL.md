@@ -381,3 +381,10 @@ O/C/E/A/N 각각 High/Medium/Low. 행동 근거 1개씩.
 - 영어 대화 → 영어 출력
 - 혼합 → 더 많이 쓰인 언어 기준
 - 전문 용어(MBTI, DiSC, Big Five 등)는 항상 영어 유지
+
+---
+
+## In production
+Run periodically on a project where Claude Code has touched
+200+ files over 4 months. Catches pattern drift — where early
+architectural decisions get quietly undermined as scale grows.

@@ -904,3 +904,10 @@ If a request requires violating an invariant, refuse and explain which rule prev
 - **Gate order prevents quality erosion** -- every shortcut creates a class of bugs that "somehow" shipped
 - **Correction before escalation** -- auto-fix twice, then ask the human. Don't waste user attention on recoverable issues
 - **Light is a valid choice** -- not every project needs drift detection. The orchestrator scales down gracefully
+
+---
+
+## In production
+Bootstrapped a 12-agent pipeline with specialized roles across
+data, analysis, alerting, and reporting. The AGENTS.md files
+generated here are still the source of truth after 4 months.

@@ -145,3 +145,10 @@ ADR saved: docs/decisions/YYYY-MM-DD-<title>.md
 `/adr` records the key technical choices made during or after.
 
 Brief → implement → `/adr` for the non-obvious decisions made along the way.
+
+---
+
+## In production
+10+ decisions documented — each capturing a tradeoff that
+wasn't obvious months later. Most valuable in retrospect:
+why certain safety constraints are architectural rather than conventional.

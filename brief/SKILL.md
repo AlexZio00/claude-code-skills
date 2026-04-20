@@ -182,3 +182,10 @@ These rules are unconditional. No edge case, no user instruction overrides them.
 - **Exit criteria는 테스트 케이스다**: "완료"를 미리 정의하지 않으면 구현 후 "이게 맞나?" 논쟁이 발생한다.
 - **brief는 구현 지시서가 아니다**: 무엇을(what)과 완료 기준만 담는다. 어떻게(how)는 구현자가 결정한다.
 - **Brief는 살아있는 문서다**: 구현 중 scope 변경이 필요하면 BRIEF.md를 먼저 수정하고, 수정된 brief 기준으로 구현을 계속한다. Brief 수정 없이 scope를 넓히지 않는다.
+
+---
+
+## In production
+Used before every feature addition on a complex multi-agent codebase.
+Has prevented at least 3 cases of "built the right thing wrong"
+by forcing non-goals and definition-of-done up front.
