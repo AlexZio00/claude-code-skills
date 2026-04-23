@@ -122,7 +122,7 @@ The harness layer determines how productive every Claude Code session will be. B
 
 **Use this AFTER `/project-init`** — project-init scaffolds the codebase, harness-init scaffolds the AI orchestration layer on top.
 
-**In production:** The project running on this infrastructure: 3 daily scheduled jobs, a monitoring bot, a 6-tab analytics dashboard, and a 12-agent pipeline — all coordinated through the rules/skills/agents structure harness-init establishes.
+**In production:** The project running on this infrastructure: 3 daily scheduled jobs, a monitoring bot, a multi-tab analytics dashboard, and a 12-agent pipeline — all coordinated through the rules/skills/agents structure harness-init establishes.
 
 ---
 
@@ -278,7 +278,7 @@ Memory alerts: [stale refs or "none"]
 
 **Discard if:** first session on the project (no handoff file), user says "start fresh."
 
-**In production:** Managing context across many sessions on a 12-agent system. Past 200 files, the handoff file became the difference between "pick up immediately" vs "20 min reconstructing state."
+**In production:** Managing context across 50+ sessions on a 12-agent system. Past 200 files, loading the handoff takes under 60 seconds — without it, the same time goes to reconstructing "where was I."
 
 ---
 
@@ -306,7 +306,7 @@ Completed items are deleted, not archived. Git history preserves them. A handoff
 
 **Discard if:** no code changes and no open decisions this session. `/compact` is a Claude Code CLI built-in — this skill cannot call it directly.
 
-**In production:** Managing context across many sessions on a 12-agent system. Past 200 files, the handoff file became the difference between "pick up immediately" vs "20 min reconstructing state."
+**In production:** Running across 50+ sessions on a 12-agent codebase. The handoff file is the single artifact that survives `/compact` — every session that skips writing it costs the next session 15–20 minutes of reconstruction.
 
 ---
 
@@ -533,7 +533,7 @@ Four patterns from Claude Code internals applied across the full skill suite:
 - **Triple Gate auto-trigger** (`session-start`): added auto-trigger signal — ≥5,000 tokens AND ≥3 tool calls AND ≥24h since last session → run session-start before new work. Prevents silent context loss.
 - **NO_TOOLS warning + 9-item expansion** (`session-checkpoint`): Phase 1 extraction expanded to 9 items (was 5). Phase 5 now explicitly warns that `/compact` disables all tools — state must be written before compaction begins, not during.
 - **YOLO classifier** (`pre-push`): read-only git ops (`git diff`, `git status`, `git log`) explicitly marked as auto-approvable without permission prompt. Write ops still gated.
-- **Advisor 2nd-review block** (`harness-init`): generated harness now includes Advisor configuration — routes APPROVE decisions to a stronger model for confirmation before finalizing.
+- **Second-opinion review gate** (`harness-init`): generated harness now includes a multi-model review gate — routes high-stakes decisions to a stronger model for confirmation before finalizing.
 - **MagicDocs** (`adr`, `collab-audit`): generated output files now use `# MAGIC DOC: [title]` heading. Claude Code auto-updates these files during conversations.
 
 ### v4.0 — Session lifecycle + Decision records (2026-04-13)
