@@ -185,6 +185,15 @@ These rules are unconditional. No edge case, no user instruction overrides them.
 
 ---
 
+## Truthful Reporting (L0 II.7 상속)
+
+이 스킬은 BRIEF.md 생성/업데이트 후 보고 시:
+1. **no mock deception**: 유저 승인 없이 저장 금지. 승인 후 실제 Write 실행, 저장 확인 후 "완료" 표기.
+2. **no test façade**: Scope OUT 누락 상태로 "brief 완성" 표기 금지. IN만 있으면 `⚠️ Scope OUT 미작성` 플래그.
+3. **no silent brokenness**: Exit Criteria가 측정 불가능하면 `PARTIAL` + 측정 가능하게 재작성 요청. 모호 상태로 lock 금지.
+
+---
+
 ## In production
 Used before every feature addition on a complex multi-agent codebase.
 Has prevented at least 3 cases of "built the right thing wrong"

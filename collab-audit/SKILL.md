@@ -384,6 +384,15 @@ O/C/E/A/N 각각 High/Medium/Low. 행동 근거 1개씩.
 
 ---
 
+## Truthful Reporting (L0 II.7 상속)
+
+이 스킬은 audit 리포트 저장 후 보고 시:
+1. **no mock deception**: 13섹션 중 관찰 근거 부족으로 추론만 한 섹션은 `⚠️ 근거 부족` 명시. "통찰"로 위장 금지.
+2. **no test façade**: 세션 수·메시지 수 최소 기준(2 sessions / 100 msgs) 미달 시 축소 리포트 생성. 임의 채워넣기 금지.
+3. **no silent brokenness**: 저장 실패 시 `BROKEN` 상태 명시. 부분 저장 시 `PARTIAL` + 누락 섹션 나열.
+
+---
+
 ## In production
 Run periodically on a project where Claude Code has touched
 200+ files over 4 months. Catches pattern drift — where early

@@ -694,6 +694,28 @@ When both exist, project-level rules extend (never weaken) global rules.
 
 ---
 
+## Safety Layers (L0 XIV 상속)
+
+| Risky Action | Reversibility | Applied Layers |
+|-------------|:-------------:|----------------|
+| `rules/*.md` 생성/덮어쓰기 | medium | L1+L3 |
+| `settings.json` 병합 수정 | medium | L1+L3 |
+| `memory/*.md` 생성 | medium | L1+L3 |
+| `agents/*.md` 생성 | medium | L1+L3 |
+
+- **L1 (Invariants)**: Phase 0 Existing File Check 강제 실행 (Update/Replace/Cancel 3-option).
+- **L3 (User Approval)**: Phase 3 File Generation 각 파일별 확인. `settings.json`은 절대 전체 replace 금지 (merge만).
+- **금지**: `settings.json`의 기존 hooks 삭제, 기존 rules 덮어쓰기 (Update 명시 없이).
+
+## Truthful Reporting (L0 II.7 상속)
+
+파일 생성 후:
+1. **no mock deception**: Write 후 Bash `ls ~/.claude/rules/` 로 파일 존재 재확인. violation testing 통과까지 완료 표기 금지.
+2. **no test façade**: Tier 0 규칙이 violation testing에서 FAIL 시 재작성 필수. "대체로 괜찮음" 표기 금지.
+3. **no silent brokenness**: 파일별 `WORKING` / `PARTIAL` / `BROKEN` 라벨. PARTIAL 시 어느 파일이 미생성인지 명시.
+
+---
+
 ## In production
 The project running on this infrastructure:
 3 daily scheduled jobs, a monitoring bot, a 6-tab analytics

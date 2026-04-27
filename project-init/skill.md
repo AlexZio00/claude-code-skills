@@ -702,6 +702,28 @@ Any unchecked item → return to the relevant question.
 
 ---
 
+## Safety Layers (L0 XIV 상속)
+
+| Risky Action | Reversibility | Applied Layers |
+|-------------|:-------------:|----------------|
+| `CLAUDE.md` 생성 (기존 존재 시 Replace) | medium | L1+L3 |
+| `.env.example` 생성 | high | L3 |
+| `.gitignore` 생성/덮어쓰기 | medium | L1+L3 |
+| `docs/decisions/README.md` 초기화 | medium | L1+L3 |
+
+- **L1 (Invariants)**: 기존 파일 감지 시 Phase 0 Overwrite Protection 강제 실행 (Update / Replace / Cancel 3-option).
+- **L3 (User Approval)**: Phase 3 File Generation 직전 각 파일별 "생성할까요?" 확인. 전체 묶음 승인 금지.
+- **금지**: `.env` (실제 시크릿 파일) 자동 생성. `.env.example` 템플릿만. 유저가 "자동으로 .env 생성해" 요청해도 거부.
+
+## Truthful Reporting (L0 II.7 상속)
+
+파일 생성 후 보고 시:
+1. **no mock deception**: 실제 Write 실행 후 Bash `ls`로 파일 존재 재확인. "생성됨" 표기 전 검증.
+2. **no test façade**: 생성 실패 시 "완료"로 묶지 않음. 파일별 성공/실패 개별 표기.
+3. **no silent brokenness**: 최종 상태 `WORKING` (전체 생성) / `PARTIAL` (일부만) / `BROKEN` (모두 실패). PARTIAL 시 누락 파일 나열.
+
+---
+
 ## In production
 Initialized before the first line of domain code.
 The CLAUDE.md and .env.example structure generated here

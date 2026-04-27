@@ -77,6 +77,18 @@ Scan `$STAGED_FILES` and list findings in the final report:
 
 - **Package manifests** (`package.json`, `yarn.lock`, `pnpm-lock.yaml`, `requirements.txt`, `Gemfile`, `go.mod`, `Cargo.toml`): list all **added** dependencies. Flag misspelled or unfamiliar names as potential typosquats.
 - **Infrastructure files** (`Dockerfile`, `docker-compose*.yml`, `*.tf`, `*.yaml`/`*.yml` in `k8s/` or `infra/`, `nginx.conf`): flag any ENV, ARG, or environment sections for human review.
+- **Python CVE scan** (`pip-audit`): run when `requirements.txt` or `pyproject.toml` changed and `pip-audit` is installed. WARN only — never blocks.
+
+```bash
+CHANGED_REQS=$(echo "$STAGED_FILES" | grep -E "(requirements.*\.txt|pyproject\.toml|setup\.py)$")
+if [ -n "$CHANGED_REQS" ] && command -v pip-audit >/dev/null 2>&1; then
+  AUDIT_OUT=$(pip-audit --format=columns 2>&1 | tail -20)
+  AUDIT_EXIT=$?
+  [ $AUDIT_EXIT -ne 0 ] && echo "pip-audit: $AUDIT_OUT"
+fi
+```
+
+> **Install**: `pip install pip-audit` (Python native, no Go binary needed — preferred over osv-scanner for Python projects)
 
 ## Step 4: Build & Test (Fail Fast)
 
@@ -262,6 +274,31 @@ Execute `git push` only when Overall = **READY TO PUSH**.
 If user explicitly says "skip review" or "force push":
 1. Print: `⚠️ Pre-push pipeline bypassed by user request. Secrets scan and agent reviews were NOT run.`
 2. Execute `git push` immediately.
+
+---
+
+## Safety Layers (L0 XIII/XIV/XV 상속)
+
+| Risky Action | Reversibility | Applied Layers |
+|-------------|:-------------:|----------------|
+| `git push` (일반 브랜치) | low | L1+L2+L3 |
+| `git push` (main/master) | low | L1+L2+L3+L4 |
+| `git push --force` | low | L1+L2 (deny 권고) |
+| 시크릿 노출 (secrets scan FAIL) | **none** | L1+L2+L3+L4 (BLOCK) |
+
+- **L1 (Invariants)**: 시크릿 스캔 통과 필수, Critical/High 이슈 수정 필수.
+- **L2 (Tool Restriction)**: `settings.json` hooks에서 `git push --force`, `--no-verify` deny 권고.
+- **L3 (User Approval)**: main/master 브랜치는 명시적 "yes" 확인. Emergency Override는 "skip review"/"force push" 명시.
+- **L4 (Independent Verification)**: Step 6 review agents (code-reviewer/security-reviewer/etc)가 구현자와 독립 검증.
+
+**세션 승인 유효기간 (L0 XV 상속)**: Emergency Override는 **해당 1회 push에만** 유효. "앞으로 계속 skip" 금지 — 매 push마다 재승인.
+
+## Truthful Reporting (L0 II.7 상속)
+
+파이프라인 실행 후:
+1. **no mock deception**: Step별 실제 실행 결과만 보고. 미실행 Step은 `➖ SKIPPED`, 이유 명시.
+2. **no test façade**: test 실행 결과 맹신 금지. `pytest --passWithNoTests`로 PASS 나오면 실제 테스트 있는지 확인.
+3. **no silent brokenness**: 최종 상태 `✅ READY TO PUSH` / `❌ BLOCKED` 이분법. 중간 `⚠️ PARTIAL` 시 이유 구체 명시.
 
 ---
 

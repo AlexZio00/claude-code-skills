@@ -1,4 +1,4 @@
-# claude-code-skills v4.4
+# claude-code-skills v4.5
 
 Audit what's broken. Scaffold what's missing. Wire the AI. Assemble the team. Lock scope. Record decisions. Open sessions right. Close sessions right. Ship with confidence. Diagnose how you work.
 
@@ -214,7 +214,7 @@ Mandatory pipeline that runs automatically before every `git push`. Blocks on se
 
 2. **Routing & remediation** — secrets found → BLOCK with per-pattern remediation instructions. Only `*.md` / `docs/**` changed → fast exit, skip remaining steps.
 
-3. **Supply chain check** — lists all added dependencies from `package.json`, `requirements.txt`, `go.mod`, `Cargo.toml`, etc. Flags misspelled or unfamiliar package names as potential typosquats. Never blocks — warns only.
+3. **Supply chain check** — lists all added dependencies from `package.json`, `requirements.txt`, `go.mod`, `Cargo.toml`, etc. Flags misspelled or unfamiliar package names as potential typosquats. Runs `pip-audit` when Python requirement files changed (WARN-only, install: `pip install pip-audit`). Never blocks — warns only.
 
 4. **Build & test** — language-aware, runs only what changed:
    - Python (`.py` changed + `pyproject.toml`/`setup.py`/`requirements.txt` present): `pytest -q`
@@ -505,6 +505,16 @@ Each file has a specific role. `/session-checkpoint` writes to all four. `/sessi
 ---
 
 ## Changelog
+
+### v4.5 — AI Constitution inheritance layer (2026-04-27)
+
+Five skills now surface their connection to a tiered rule framework — Safety Layers and Truthful Reporting sections document exactly which constraints are inherited, from which layer, and why.
+
+- **`pre-push`**: Python CVE scan via `pip-audit` added to Step 3 (WARN-only, never blocks). Preferred over osv-scanner for Python-native projects. Also adds Safety Layers (L0 XIII/XIV/XV) mapping each push action to its reversibility tier, and Truthful Reporting (L0 II.7) clarifying what "READY TO PUSH" actually means.
+- **`collab-audit`**, **`brief`**: Truthful Reporting (L0 II.7) — what counts as a complete audit vs. inference-padded output; what counts as a locked scope vs. a draft.
+- **`harness-init`**, **`project-init`**: Safety Layers (L0 XIV) + Truthful Reporting (L0 II.7) — maps file-creation actions to reversibility tiers and defense layers. Prohibitions explicit: no `.env` generation, no `settings.json` overwrite.
+
+**What these sections reference:** A personal AI Constitution — a layered rule framework governing how AI agents behave across projects. The public skills inherit constraints from it; the constitution itself isn't published because it's entangled with project-specific rules and session management patterns that don't transfer cleanly as standalone files.
 
 ### v4.4 — In production reference cases (2026-04-20)
 
