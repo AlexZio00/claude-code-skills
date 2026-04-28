@@ -63,6 +63,7 @@ Scan the session conversation for four entity types:
 **③ Raw observations / patterns** → preserve exact user phrasing
 - Insights, judgments, or frustrations expressed directly by the user
 - Candidates for `tasks/lessons.md` if they describe a repeated mistake
+- **lessons.md v2 metadata enrichment (added 2026-04-28, ECC continuous-learning-v2 concept)**: For new lessons, add a metadata line below the header: `> conf: 0.5 · seen: today · obs: 1`. On re-observation/re-application of an existing lesson, update `seen` to today and increment `obs`. After obs reaches 3 / 6 / 9, raise `conf` by +0.1 (max 0.9). On user correction after a violation, lower `conf` by -0.1 (min 0.3) and update `seen`.
 
 **④ Stale detection** → force MEMORY.md promotion
 - Items in `memory/context-log.md` with `[ref:N]` where N ≥ 3 → check if they belong in MEMORY.md
@@ -164,6 +165,11 @@ Apply Phase 1.5 extraction results to files:
    - Stale items (contradicted by current state) → fix immediately
 2. **`memory/context-log.md`** — append episode entries (date + TTL + ref:0 format required)
 3. **`tasks/lessons.md`** — add behavior correction rules triggered this session (only if a real mistake occurred)
+   - **v2 format (added 2026-04-28~, ECC continuous-learning-v2 concept)**: For new lessons, the header `### [YYYY-MM-DD] title` is followed by a metadata line `> conf: 0.5 · seen: YYYY-MM-DD · obs: 1`
+   - **On re-observation**: locate the existing lesson header → update `seen` to today, increment `obs`. After obs reaches 3 / 6 / 9, raise `conf` by +0.1 (max 0.9)
+   - **On violation + user correction**: lower `conf` by -0.1 (min 0.3), update `seen` to today
+   - **Quarterly cleanup** (1st of each month or stale detection): `conf < 0.4 AND (today − seen) > 90 days` → move to `tasks/_archive/lessons-pre-YYYY-MM.md`
+   - Backward compatible: lessons without v2 metadata are unchanged
 4. Remove references to old handoff filenames in MEMORY.md index; unify to LATEST.
 
 ---

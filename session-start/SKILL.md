@@ -42,6 +42,13 @@ Scan for rules relevant to today's priorities:
 - About to commit or push → check commit-related rules
 - Debugging → check any debugging anti-patterns recorded
 
+**v2 metadata utilization (`> conf · seen · obs`, added 2026-04-28~)**:
+- `conf ≥ 0.7` (verified/core) → flag the **rule body in 1 line** as priority signal
+- `conf 0.5` (moderate) → show **title only, 1 line**
+- `conf < 0.5` (tentative/experimental) → **TOC header only** or skip (noise)
+- `seen` within 30 days AND `obs ≥ 3` → active pattern, surface first
+- Lessons without v2 metadata (legacy) → handle normally (backward compat)
+
 Flag each applicable rule, one line each. Skip silently if file missing.
 
 ---
