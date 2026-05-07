@@ -1,4 +1,4 @@
-# claude-code-skills v4.6
+# claude-code-skills v4.7
 
 Audit what's broken. Scaffold what's missing. Wire the AI. Assemble the team. Lock scope. Record decisions. Open sessions right. Close sessions right. Ship with confidence. Diagnose how you work.
 
