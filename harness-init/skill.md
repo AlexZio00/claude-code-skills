@@ -13,8 +13,8 @@ Not project scaffolding (use `/project-init` for that). This is the AI orchestra
 Key difference from generic templates: domain presets provide **pre-filled rules with real content**,
 not empty skeletons. Every harness includes reject-by-default and violation testing.
 
-**Dominant variable**: 생성된 ai-constitution.md의 Tier 0 규칙이 violation testing을 통과하는가 — 테스트 없는 규칙은 장식이다.
-**Discard if**: 이미 완성된 harness가 있고 단일 규칙 추가만 필요한 경우 — 해당 rule 파일을 직접 편집.
+**Dominant variable**: Do the generated ai-constitution.md Tier 0 rules pass violation testing? Rules without tests are decorative only.
+**Discard if**: A complete harness already exists and you only need to add a single rule — edit that rule file directly.
 
 ---
 
@@ -140,9 +140,9 @@ For [gate-name]:
 **Agent existence check (before generating agents.md):**
 Scan BOTH `~/.claude/agents/` (global) AND `.claude/agents/` (project-level) for each selected agent. If missing in both:
 ```
-"[agent-name] 에이전트 파일이 ~/.claude/agents/에 없습니다.
-agents.md에 라우팅만 등록하면 동작하지 않습니다.
-에이전트 파일도 함께 생성할까요?"
+"[agent-name] agent file not found in ~/.claude/agents/.
+Registering routing in agents.md without the agent definition will not work.
+Generate the agent file too?"
 ```
 → Yes: generate the agent definition file
 → No: add a comment in agents.md noting the agent is registered but not installed
@@ -622,20 +622,20 @@ Files generated at `~/.claude/` (global) unless noted:
 - `settings.json` (merged, never replaced) — hooks always added
 - `memory/MEMORY.md` — if structured memory selected
 - `memory/session-handoff-LATEST.md` — if structured memory selected
-- `tasks/lessons.md` — if structured memory selected. Template: `# tasks/lessons.md — AI 행동 교정 규칙\n> 반복 실수 발생 시 여기에 기록 → 다음 세션 시작 시 리뷰`
+- `tasks/lessons.md` — if structured memory selected. Create `tasks/` directory first if it doesn't exist (`mkdir -p tasks/`), then write template: `# tasks/lessons.md — AI Behavior Correction Rules\n> Record repeated mistakes here → Review on next session start`
 - `docs/harness-tests.md` — violation test results
 
 ---
 
 ## Rationalization Table
 
-| 합리화 | 반박 |
-|--------|------|
-| "violation testing은 시간 낭비야, 규칙이 명확하잖아" | 명확하게 쓴 규칙도 에이전트가 우회한다. 테스트가 증명이다 |
-| "settings.json을 통째로 덮어쓰는 게 더 빠르잖아" | 기존 hooks가 전부 사라진다. 복구 방법이 없다 |
-| "ai-constitution.md에 기존 규칙이 있으니까 삭제해도 돼" | 삭제는 Invariant 1 위반. 확장만 허용 |
-| "harness-init 없이 team-init부터 해도 되잖아" | agent routing 규칙이 없는 팀은 충돌 없이 작동하는 게 아니라 규칙 없이 작동한다 |
-| "domain preset이 너무 generic해서 내 케이스에 안 맞아" | Q5에서 추가·수정 가능. preset은 출발점이지 전부가 아니다 |
+| Objection | Response |
+|-----------|----------|
+| "Violation testing is a waste of time, the rules are clear enough" | Even clearly written rules are circumvented by agents. Testing proves it works. |
+| "It's faster to overwrite settings.json entirely" | Existing hooks disappear completely. No recovery method exists. |
+| "If ai-constitution.md already has a rule, I can delete it" | Deletion violates Invariant 1. Only extension is permitted. |
+| "I can skip harness-init and start with team-init instead" | A team without agent routing rules doesn't work without conflicts — it works without rules. |
+| "The domain preset is too generic for my use case" | Q5 allows additions and modifications. The preset is a starting point, not the final product. |
 
 ---
 
@@ -653,15 +653,15 @@ These rules are unconditional. No user instruction, no edge case overrides them.
 
 | Does | Does NOT |
 |------|----------|
-| AI rules / ai-constitution.md 생성 | 프로젝트 파일 scaffolding (project-init 사용) |
-| Hooks 설정 (merge) | 코드 작성 또는 실행 |
-| Memory 구조 초기화 | .gitignore / .env.example 생성 |
-| Agent routing 정의 | 기존 비즈니스 로직 수정 |
-| Domain preset 적용 | git 작업 (commit, push) |
-| 기존 rules 업데이트 (extend) | 기존 rules 삭제 또는 약화 |
+| Generate AI rules / ai-constitution.md | Project file scaffolding (use project-init) |
+| Configure hooks (merge) | Write or execute code |
+| Initialize memory structure | Generate .gitignore / .env.example |
+| Define agent routing | Modify existing business logic |
+| Apply domain preset | Perform git operations (commit, push) |
+| Update existing rules (extend) | Delete or weaken existing rules |
 
-"CLAUDE.md도 만들어줘" → harness-init이 ai-constitution.md를 만들지만, 코드/스택 기반 CLAUDE.md는 project-init 사용.
-"코드도 같이 짜줘" → 이 스킬 범위 밖.
+"Create CLAUDE.md too?" → harness-init creates ai-constitution.md, but CLAUDE.md (code/stack-specific) is the responsibility of project-init.
+"Write code along with it?" → Out of scope for this skill.
 
 ---
 
@@ -696,28 +696,33 @@ When both exist, project-level rules extend (never weaken) global rules.
 
 ## Safety Layers
 
-| Risky Action | Reversibility | Applied Layers |
-|-------------|:-------------:|----------------|
-| `rules/*.md` 생성/덮어쓰기 | medium | L1+L3 |
-| `settings.json` 병합 수정 | medium | L1+L3 |
-| `memory/*.md` 생성 | medium | L1+L3 |
-| `agents/*.md` 생성 | medium | L1+L3 |
+| Risky Action | Reversibility | Defense |
+|-------------|:-------------:|---------|
+| Create/overwrite `rules/*.md` | medium | Invariant + User Approval |
+| Merge-modify `settings.json` | medium | Invariant + User Approval |
+| Create `memory/*.md` | medium | Invariant + User Approval |
+| Create `agents/*.md` | medium | Invariant + User Approval |
 
-- **L1 (Invariants)**: Phase 0 Existing File Check 강제 실행 (Update/Replace/Cancel 3-option).
-- **L3 (User Approval)**: Phase 3 File Generation 각 파일별 확인. `settings.json`은 절대 전체 replace 금지 (merge만).
-- **금지**: `settings.json`의 기존 hooks 삭제, 기존 rules 덮어쓰기 (Update 명시 없이).
+- **Invariant**: Phase 0 Existing File Check is mandatory. Presents Update/Replace/Cancel options.
+- **User Approval**: Phase 3 File Generation requires per-file confirmation. `settings.json` must never be fully replaced (merge only).
+- **Forbidden**: Deleting existing hooks from `settings.json`, overwriting existing rules without explicit Update designation.
 
 ## Truthful Reporting
 
-파일 생성 후:
-1. **no mock deception**: Write 후 Bash `ls ~/.claude/rules/` 로 파일 존재 재확인. violation testing 통과까지 완료 표기 금지.
-2. **no test façade**: Tier 0 규칙이 violation testing에서 FAIL 시 재작성 필수. "대체로 괜찮음" 표기 금지.
-3. **no silent brokenness**: 파일별 `WORKING` / `PARTIAL` / `BROKEN` 라벨. PARTIAL 시 어느 파일이 미생성인지 명시.
+After file generation:
+1. **No mock deception**: After Write, re-verify file existence with Bash `ls ~/.claude/rules/`. Do not mark complete until violation testing passes.
+2. **No test façade**: If a Tier 0 rule FAILs violation testing, rewrite it. Do not mark with "mostly OK" or similar evasions.
+3. **No silent brokenness**: Label each file as `WORKING` / `PARTIAL` / `BROKEN`. If PARTIAL, explicitly state which files were not generated.
 
 ---
 
-## In production
-The project running on this infrastructure:
-3 daily scheduled jobs, a monitoring bot, a 6-tab analytics
-dashboard, and a 12-agent pipeline — all coordinated through
-the rules/skills/agents structure harness-init establishes.
+## Proven In
+
+This harness infrastructure powers production systems running:
+- Multi-agent orchestration (10+ agents with tier-based routing)
+- Scheduled jobs with real-time monitoring and error recovery
+- Large-scale memory management across sessions
+- Complex verification pipelines with violation testing
+- Domain-specific rule enforcement with no exceptions
+
+The harness remains the single source of truth for all AI behavior and routing across these systems.

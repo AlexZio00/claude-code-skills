@@ -1,6 +1,6 @@
 ---
 name: team-init
-description: "This skill permanently installs a Claude Code agent team — orchestrator, reviewers, implementers — into ~/.claude/agents/ from a 3-question interview. Use when: user says '/team-init', '코딩팀 설치해줘', '에이전트팀 설치', 'install coding team', 'set up agent team', 'agent team setup', 'orchestrator 설치', '팀 에이전트 설치'. NOT for scaffolding (use project-init), NOT for harness rules (use harness-init), NOT for runtime task execution (use kkirikkiri). This is permanent file installation, not session-level team management. Third step: project-init -> harness-init -> team-init."
+description: "This skill permanently installs a Claude Code agent team — orchestrator, reviewers, implementers — into ~/.claude/agents/ from a 3-question interview. Use when: user says '/team-init', '코딩팀 설치해줘', '에이전트팀 설치', 'install coding team', 'set up agent team', 'agent team setup', 'orchestrator 설치', '팀 에이전트 설치'. NOT for scaffolding (use project-init), NOT for harness rules (use harness-init). This is permanent file installation, not session-level team management. Third step: project-init -> harness-init -> team-init."
 user_invocable: true
 ---
 
@@ -18,8 +18,8 @@ This is the third step in the setup trilogy:
 Key difference from manual setup: the orchestrator includes **drift detection and correction loop** --
 when implementation diverges from the plan, it catches it automatically instead of requiring human intervention.
 
-**Dominant variable**: 오케스트레이터가 게이트 순서를 강제하고 플랜 드리프트를 감지하는가 — 없으면 팀은 todo 리스트에 불과하다.
-**Discard if**: 에이전트 1-2개만 필요한 스크립트급 프로젝트, 또는 harness-init 미완료 상태.
+**Dominant variable**: Does the orchestrator enforce gate sequence and detect plan drift? Without it, the team is just a todo list.
+**Discard if**: Only 1-2 agents needed (script-level projects), or harness-init not yet completed.
 
 ---
 
@@ -28,7 +28,7 @@ when implementation diverges from the plan, it catches it automatically instead 
 ### 0-1. Harness Check
 Check if `~/.claude/rules/agents.md` exists.
 - **Found** -> read it. Extract existing agent definitions, routing rules, tier priorities.
-- **Not found** -> warn: "harness-init을 먼저 실행하면 agent routing 규칙이 자동으로 설정됩니다. 없이 진행할까요?"
+- **Not found** -> warn: "Running `/harness-init` first will auto-configure agent routing rules. Proceed without it?"
   - Yes -> proceed (team-init will generate a minimal agents.md)
   - No -> stop, recommend `/harness-init` first
 
@@ -191,10 +191,10 @@ Check if `~/.claude/agents/orchestrator.md` already exists.
 - **Not found** -> generate (proceed normally)
 - **Found** -> read it, then ask:
   ```
-  orchestrator.md가 이미 존재합니다. 어떻게 할까요?
-  1. Update — 기존 내용 기반 보강 (interview 답변으로 domain checks + authority 확장)
-  2. Replace — 처음부터 재작성 (기존 내용 삭제)
-  3. Cancel — 오케스트레이터는 그대로 두고, 나머지 팀원만 생성
+  orchestrator.md already exists. What would you like to do?
+  1. Update — enhance existing content (extend domain checks + authority from interview answers)
+  2. Replace — rewrite from scratch (delete existing content)
+  3. Cancel — keep orchestrator as-is, generate other team members only
   ```
   Default: Update. Never silently overwrite.
 
@@ -856,13 +856,13 @@ Updated:
 
 ## Rationalization Table
 
-| 합리화 | 반박 |
-|--------|------|
-| "orchestrator 없이 에이전트 2-3개만 써도 충분해" | 드리프트 감지 없는 팀은 TODO 리스트와 다를 게 없다 |
-| "기존 orchestrator.md가 있으니까 그냥 두면 되잖아" | 기존 오케스트레이터가 현재 팀 구성을 반영하지 않으면 gate 오류가 조용히 발생한다 |
-| "harness-init 먼저 안 해도 team-init만 실행해도 돼" | agents.md 없이 생성된 팀은 routing 규칙이 없다 |
-| "Solo 3개로 시작했다가 나중에 Full로 늘리면 되잖아" | 늘려도 됨. 단 orchestrator는 팀 변경 시 반드시 Update 필요 |
-| "에이전트가 많을수록 좋은 거 아니야?" | 에이전트 수 ≠ 품질. 드리프트 감지 오케스트레이터 1개가 조율 없는 에이전트 5개보다 낫다 |
+| Claim | Reality |
+|--------|---------|
+| "2-3 agents are enough, no need for orchestrator" | Teams without drift detection are just todo lists |
+| "We already have orchestrator.md, just leave it" | If the existing orchestrator doesn't reflect current team composition, gate errors happen silently |
+| "team-init alone works, no need for harness-init first" | A team generated without agents.md has no routing rules |
+| "Start with Solo (3 agents), upgrade to Full later" | That's fine — but orchestrator MUST be Updated when team composition changes |
+| "More agents = better quality, right?" | Agent count ≠ quality. One drift-detecting orchestrator beats five uncoordinated agents |
 
 ---
 
@@ -885,14 +885,14 @@ If a request requires violating an invariant, refuse and explain which rule prev
 |------|----------|
 | Agent .md files generate (orchestrator + team) | Application/production code write |
 | agents.md merge (new agents add) | Existing agent files modify/delete |
-| Domain preset content populate | harness rules (ai-constitution) generate |
+| Domain preset content populate | harness rules (constitution) generate |
 | Orchestrator drift detection configure | Project scaffolding (CLAUDE.md, .gitignore) |
 | Gate enforcement order define | Hooks or memory structure set up |
 | Existing agent scan + skip | git operations (commit, push) |
 
-"rules도 만들어줘" -> use `/harness-init`
-"프로젝트도 셋업해줘" -> use `/project-init`
-"코드도 같이 짜줘" -> outside this skill's scope
+"I need rules set up too" -> use `/harness-init`
+"I need project scaffolding" -> use `/project-init`
+"I need you to write code" -> outside this skill's scope
 
 ---
 
@@ -907,7 +907,7 @@ If a request requires violating an invariant, refuse and explain which rule prev
 
 ---
 
-## In production
-Bootstrapped a 12-agent pipeline with specialized roles across
-data, analysis, alerting, and reporting. The AGENTS.md files
-generated here are still the source of truth after 4 months.
+## Proven In
+This skill has been used to bootstrap multi-agent teams in various domains
+(trading systems, data pipelines, web applications). Generated agent files remain
+the authoritative source of truth throughout team evolution.

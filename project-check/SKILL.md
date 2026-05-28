@@ -1,8 +1,17 @@
 ---
 name: project-check
-description: "Existing project health scan — audits Infrastructure, Security, Quality, and Harness setup. Read-only. Use when: '/project-check', '프로젝트 점검', '뭐가 부족해', '기존 프로젝트 확인', 'project health check', 'project audit', '내 프로젝트 분석해줘', '설정 점검'. Ends with /project-init and /harness-init recommendations. NOT for new projects (use /project-init)."
+description: "Existing project health scan — audits Infrastructure, Security, Quality, and Harness setup. Read-only. Ends with /project-init and /harness-init recommendations. NOT for new projects (use /project-init)."
 user_invocable: true
 tools: Read, Bash, Glob, Grep
+triggers:
+  - "/project-check"
+  - "project health check"
+  - "project audit"
+  - "what's missing"
+  - "check my project"
+  - "setup check"
+  - "프로젝트 점검"
+  - "뭐가 부족해"
 ---
 
 # Project Check — Existing Project Health Scan
@@ -10,8 +19,8 @@ tools: Read, Bash, Glob, Grep
 ## Purpose
 Scan an existing project against setup best practices across 4 dimensions: Infrastructure, Security, Quality, and Harness. Surface all gaps ordered by severity so the user knows exactly what to fix and in what order.
 
-**Dominant variable**: 🔴 Security 이슈(하드코딩 시크릿, .env 미포함)가 다른 모든 갭보다 먼저 표시되는가.
-**Discard if**: 빈 디렉토리 또는 방금 `git init`한 신규 프로젝트 — 점검할 코드가 없음. `/project-init` 으로 직접 시작.
+**Dominant variable**: 🔴 Security issues (hardcoded secrets, missing .env) always surface before all other gaps.
+**Discard if**: Empty directory or freshly initialized project with no code to check. Start with `/project-init` instead.
 
 ---
 
@@ -103,12 +112,12 @@ Check Claude Code infrastructure:
 | `~/.claude/agents/orchestrator.md` | Exists? | ⚠ if missing |
 | Orchestrator type | Contains drift detection (`MISSING`, `EXTRA`, `DIVERGED`, correction loop)? | ⚠ if absent |
 | `tasks/lessons.md` | Exists? (skip if scale=script) | ⚠ if scale=full/mini |
-| SubagentStop hook | `settings.json` hooks에 SubagentStop 포함? | ⚠ if missing |
+| SubagentStop hook | hooks section in settings.json includes SubagentStop? | ⚠ if missing |
 
 Count total agent files across both locations. Report global vs project-level split.
 Report which key agents are installed (orchestrator, code-reviewer, verification, brainstorming, security-reviewer).
 
-If CLAUDE.md has inline Hard Rules AND `~/.claude/rules/ai-constitution.md` exists → ⚠ "Hard Rules 중복: CLAUDE.md 직접 기재 + ai-constitution.md 존재. ai-constitution.md 참조 링크로 통일 권장."
+If CLAUDE.md has inline Hard Rules AND `~/.claude/rules/ai-constitution.md` exists → ⚠ "Hard Rules duplication: inline in CLAUDE.md + ai-constitution.md present. Recommend unifying via reference link to ai-constitution.md."
 
 ### Step 5: Build Report
 
@@ -148,34 +157,34 @@ Gap: [N]건 (🔴 [N], ✗ [N], ⚠ [N])
 
 Always end with next steps:
 
-- 🔴 Security → "🔴 먼저: [file:line]에서 시크릿 제거 → .env로 이동 (수동 수정 필요)"
-- Infrastructure ✗ → "→ `/project-init` — CLAUDE.md 있으면 Update 모드로 선택"
-- Harness rules ✗/⚠ (ai-constitution, agents.md, hooks) → "→ `/harness-init` 으로 Claude Code 인프라 구성"
-- Harness agents ✗/⚠ (no agents, no orchestrator) → "→ `/team-init` 으로 에이전트팀 설치 (orchestrator + reviewer + implementer)"
-- Orchestrator Light only → "→ `/team-init` Update 모드로 Full orchestrator (drift detection) 활성화 가능"
-- Quality only → "→ 테스트 추가 권장"
-- Score ≥ 8 → "✓ 이미 잘 구성됨. 선택적으로 ⚠ 항목만 보완."
+- 🔴 Security → "Remove secrets from [file:line] and move to .env (manual fix required)"
+- Infrastructure ✗ → "Run `/project-init` — select Update mode if CLAUDE.md already exists"
+- Harness rules ✗/⚠ (ai-constitution, agents.md, hooks) → "Run `/harness-init` to set up Claude Code infrastructure"
+- Harness agents ✗/⚠ (no agents, no orchestrator) → "Run `/team-init` to install agent team (orchestrator + code-reviewer + verification)"
+- Orchestrator Light only → "Run `/team-init` in Update mode to enable Full orchestrator with drift detection"
+- Quality only → "Add tests to improve coverage"
+- Score ≥ 8 → "Already well configured. Optionally address ⚠ items for polish."
 
-**추천 루프 (신규 사용자):**
+**Recommended workflow for new users:**
 ```
-/project-check → 갭 발견
-  → /project-init  (CLAUDE.md + ROADMAP + .gitignore)
-  → /harness-init  (ai-constitution + hooks + memory)
-  → /team-init     (orchestrator + 에이전트팀)
-  → /project-check (재점검 → score 개선 확인)
+/project-check → identify gaps
+  → /project-init    (CLAUDE.md + ROADMAP + .gitignore)
+  → /harness-init    (ai-constitution + hooks + memory)
+  → /team-init       (orchestrator + agent team)
+  → /project-check   (re-check → verify score improvement)
 ```
 
 ---
 
 ## Rationalization Table
 
-| 합리화 | 반박 |
-|--------|------|
-| "이 프로젝트는 신규라 갭이 많은 게 당연해" | 당연하다고 수용하면 점수는 의미가 없다. 갭은 액션 아이템이다 |
-| "보안 스캔은 false positive가 많아" | 판단은 개발자 몫. 스캔은 의심 패턴을 표면화한다. 묻는 게 낫다 |
-| "ROADMAP은 소규모 프로젝트에 불필요해" | Scale=script이면 자동으로 경고 생략됨. 직접 스킵하지 말 것 |
-| "Harness 점검은 Claude Code 전용이라 우리엔 해당 없어" | 에이전트 인프라 부재 = 세션마다 재설명. 비용이 쌓인다 |
-| "점수가 낮아도 지금 당장 고칠 여유가 없어" | 점수는 우선순위 정보. 무시하는 것과 미루는 것은 다르다 |
+| Objection | Response |
+|-----------|----------|
+| "This project is new, so gaps are expected" | If gaps are expected, the score loses meaning. Gaps are action items. |
+| "Security scans produce too many false positives" | Judgment is the developer's responsibility. The scan surfaces suspicious patterns. Better to ask than ignore. |
+| "ROADMAP is unnecessary for small projects" | Scale=script automatically skips that warning. Don't manually skip it; let the tool decide. |
+| "Harness checks don't apply to us — we're not using Claude Code agents" | Missing agent infrastructure means re-explaining context every session. Costs accumulate. |
+| "The score is low but we don't have time to fix it now" | The score is priority information. Ignoring and deferring are not the same. |
 
 ---
 
@@ -183,11 +192,35 @@ Always end with next steps:
 
 | Does | Does NOT |
 |------|----------|
-| 파일 존재 여부 스캔 (Glob) | 어떤 파일도 수정/생성/삭제 |
-| 코드 패턴 Grep (read-only) | 테스트 실행 (pytest, jest, go test 등) |
-| 갭 리포트 출력 | git 명령 실행 |
-| /project-init, /harness-init 추천 | 시크릿 직접 제거 |
-| CLAUDE.md 내용 분석 | 코드 리팩토링 또는 버그 수정 |
+| Scan file existence (Glob) | Modify, create, or delete any files |
+| Grep code patterns (read-only) | Execute tests (pytest, jest, go test, etc.) |
+| Output gap report | Run git commands |
+| Recommend /project-init, /harness-init | Remove secrets directly |
+| Analyze CLAUDE.md content | Refactor code or fix bugs |
+
+---
+
+## Safety Layers
+
+| Risky Action | Applied Layers |
+|-------------|----------------|
+| Writing, editing, or deleting any file | **L1 BLOCK** — Invariant 1 (read-only) |
+| Running tests or build commands | **L1 BLOCK** — Invariant 4 (no test execution) |
+| Removing or rotating secrets directly | **L1 BLOCK** — report `file:line` location only; user fixes |
+
+- **L1 (Invariants)**: All modifications are blocked by Invariant 1. This is the only safety layer needed for a read-only diagnostic tool — no user instruction overrides it.
+
+---
+
+## Error Recovery
+
+When a tool call fails or data is missing, stop → classify → recover → resume.
+
+| Failure Type | Detection | Recovery |
+|-------------|-----------|----------|
+| `tool_failure` | File read fails (permission / path error) | Reduce scan scope to accessible files. Note the limitation explicitly in the report — do not present a partial scan as a full scan. |
+| `missing_data` | CLAUDE.md missing / project root unclear | Report "CLAUDE.md not found" — do not infer or fabricate contents. Continue scanning available files. |
+| `input_error` | Target project is ambiguous | Auto-detect from current directory. If detection fails, ask one question before proceeding. |
 
 ---
 
@@ -227,7 +260,7 @@ Sections always in this order:
 
 ---
 
-## In production
-Run before each sprint on a 200+ file codebase.
+## Proven In
+Runs on codebases ranging from single-file scripts to 500+ file projects.
 Consistently surfaces: coverage gaps in new modules,
 missing .env.example entries, stale docs after refactors.

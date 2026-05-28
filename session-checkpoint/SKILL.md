@@ -41,11 +41,11 @@ Extract what compact could destroy. Full Compact preserves these 9 categories �
 
 ---
 
-## Phase 1.5: Entity Extraction (Dream Cycle pattern)
+## Phase 1.5: Entity Extraction
 
-> **Triple Gate auto-trigger** (autoDream pattern, ch13):
+> **Auto-trigger recommendation** (heuristic):
 > Accumulated tokens ≥ 5,000 AND tool calls ≥ 3 AND ≥ 24h since last checkpoint
-> → When all three conditions hit simultaneously, auto-execute is recommended. Same criteria apply on manual invocation.
+> → When all three conditions hit simultaneously, checkpoint is recommended. Same criteria apply on manual invocation.
 
 Scan the session conversation for four entity types:
 
@@ -63,40 +63,24 @@ Scan the session conversation for four entity types:
 **③ Raw observations / patterns** → preserve exact user phrasing
 - Insights, judgments, or frustrations expressed directly by the user
 - Candidates for `tasks/lessons.md` if they describe a repeated mistake
-- **lessons.md v2 metadata enrichment (added 2026-04-28, ECC continuous-learning-v2 concept)**: For new lessons, add a metadata line below the header: `> conf: 0.5 · seen: today · obs: 1`. On re-observation/re-application of an existing lesson, update `seen` to today and increment `obs`. After obs reaches 3 / 6 / 9, raise `conf` by +0.1 (max 0.9). On user correction after a violation, lower `conf` by -0.1 (min 0.3) and update `seen`.
+- **lessons.md v2 metadata enrichment**: For new lessons, add a metadata line below the header: `> conf: 0.5 · seen: today · obs: 1`. On re-observation/re-application of an existing lesson, update `seen` to today and increment `obs`. After obs reaches 3 / 6 / 9, raise `conf` by +0.1 (max 0.9). On user correction after a violation, lower `conf` by -0.1 (min 0.3) and update `seen`.
 
 **④ Stale detection** → force MEMORY.md promotion
 - Items in `memory/context-log.md` with `[ref:N]` where N ≥ 3 → check if they belong in MEMORY.md
 - Same entity appearing 3+ times → add to MEMORY.md if not already there
 
-**⑤ Snapshot Cleanup (90-day policy)**
+**⑤ Optional: Snapshot Cleanup (90-day policy)**
 
-If `~/.claude/.harness/snapshots/` exists, check for outdated snapshots:
-
-```bash
-CUTOFF=$(date -d "90 days ago" +%Y-%m-%d 2>/dev/null || date -v-90d +%Y-%m-%d)
-ls -d ~/.claude/.harness/snapshots/*/ 2>/dev/null | while read skill_dir; do
-  ls -d "${skill_dir}"*/ 2>/dev/null | while read snap; do
-    SNAP_DATE=$(basename "$snap" | cut -c1-10)
-    [ "$SNAP_DATE" \< "$CUTOFF" ] && echo "Old snapshot: $snap"
-  done
-done
-```
-
-If snapshots older than 90 days are found, notify the user:
-```
-💡 Snapshots older than 90 days found in ~/.claude/.harness/snapshots/
-To delete: rm -rf ~/.claude/.harness/snapshots/<skill-name>/<YYYY-MM-DD-*>/
-Not auto-deleted — review the list and remove manually.
-```
-If none found or directory missing: skip this step (no output).
+If your project has a snapshots directory for session state snapshots, optionally check for outdated files:
+- Files older than 90 days can typically be archived or deleted
+- This is optional and only relevant if your project maintains such a directory
+- Not applicable to most projects; skip if not using snapshots
 
 ---
 
-## Phase 1.6: Task-to-Skill Crystallization (GenericAgent pattern)
+## Phase 1.6: Repeated Workflow Detection
 
-> **Purpose**: propose auto-promotion of repeated workflows into a skill. The point where "manual repetition 3 times" converts into "one skill call".
-> **Origin**: GenericAgent — task execution crystallization pattern.
+> **Purpose**: detect repeated manual workflows that could be promoted to a reusable skill. The point where "manual repetition 3 times" signals "this should become a skill call".
 
 Scan this session's tool calls and user messages for **repeated workflow signatures**.
 
@@ -106,30 +90,29 @@ Three elements of the same workflow must be similar:
 2. **Tool Sequence** — executed tool-call pattern (e.g., Read → Grep → Edit → Bash test)
 3. **Output Shape** — final deliverable form (report / code change / file creation)
 
-**Crystallization triggers (either one):**
+**Detection triggers (either one):**
 - **Within-session repetition**: same signature executed **≥ 3 times** this session
 - **Cross-session accumulation**: `[ref:N]` in `memory/context-log.md` for the same task type ≥ 5
 
-**Output format when triggered:**
+**Output format when detected:**
 ```
-[Crystallization candidate detected]
+[Repeated workflow candidate detected]
 - Signature: {Intent} + {Tool Sequence} + {Output Shape}
 - Frequency: {N} this session / {M} accumulated
-- Suggestion: promote this workflow into a new skill (use your skill-authoring workflow of choice)
+- Suggestion: this workflow might benefit from a dedicated skill
 - Proposed skill name: {snake_case_name}
-- Proposed triggers: {Korean + English trigger phrases — 3 examples}
+- Proposed triggers: {trigger phrases — 3 examples}
 ```
 
-**Non-trigger conditions (skip crystallization):**
+**Non-trigger conditions (skip proposal):**
 - One-off exploration (single Glob → Read)
 - Signature duplicates an existing skill — scan `~/.claude/skills/*/SKILL.md` to confirm
 - Signature is too generic → would collide with an already-established skill
 
 **Promotion workflow:**
-Propose only. Never author the skill automatically.
-If user approves ("yes" / "ㅇㅇ" / "approve" / "make it") → hand off to the user's skill-authoring workflow.
-If user declines ("no" / "pass" / "skip") → drop proposal, log to `tasks/lessons.md`:
-`[YYYY-MM-DD] crystallization candidate rejected: {signature} — reason required`
+Proposal only. Never author the skill automatically.
+If user approves ("yes" / "approve" / "make it") → user invokes their skill-authoring workflow.
+If user declines ("no" / "pass" / "skip") → drop proposal, optionally log to `tasks/lessons.md` for future reference.
 
 ---
 
@@ -186,17 +169,22 @@ Apply Phase 1.5 extraction results to files:
    - Check for duplicates before adding (skip or update if already present)
    - Stale items (contradicted by current state) → fix immediately
 2. **`memory/context-log.md`** — append episode entries (date + TTL + ref:0 format required)
-3. **`tasks/lessons.md`** — add behavior correction rules triggered this session (only if a real mistake occurred)
-   - **v2 format (added 2026-04-28~, ECC continuous-learning-v2 concept)**: For new lessons, the header `### [YYYY-MM-DD] title` is followed by a metadata line `> conf: 0.5 · seen: YYYY-MM-DD · obs: 1`
+3. **`tasks/lessons.md`** — add behavior correction rules triggered this session (only if a real mistake occurred). If the file does not exist, create it first with a minimal header before writing:
+   ```markdown
+   # Lessons
+   <!-- conf scale: 0.3 (tentative) → 0.5 (moderate) → 0.7+ (verified) -->
+   <!-- Format: ### [YYYY-MM-DD] Title / > conf: X · seen: YYYY-MM-DD · obs: N / body -->
+   ```
+   - **v2 format**: For new lessons, the header `### [YYYY-MM-DD] title` is followed by a metadata line `> conf: 0.5 · seen: YYYY-MM-DD · obs: 1`
    - **On re-observation**: locate the existing lesson header → update `seen` to today, increment `obs`. After obs reaches 3 / 6 / 9, raise `conf` by +0.1 (max 0.9)
    - **On violation + user correction**: lower `conf` by -0.1 (min 0.3), update `seen` to today
-   - **Quarterly cleanup** (1st of each month or stale detection): `conf < 0.4 AND (today − seen) > 90 days` → move to `tasks/_archive/lessons-pre-YYYY-MM.md`
+   - **Periodic cleanup** (optional): `conf < 0.4 AND (today − seen) > 90 days` → move to archive folder
    - Backward compatible: lessons without v2 metadata are unchanged
 4. Remove references to old handoff filenames in MEMORY.md index; unify to LATEST.
-5. **`~/.claude/STATE.md`** (cross-project state file, if it exists) — update if a significant state change occurred this session:
-   - Resolved blockers → remove the row
-   - Completed PENDING items → remove the row
-   - Major milestones → add a one-line entry to the change log
+5. **Optional cross-project state file** — if your project maintains a STATE.md or similar cross-project state:
+   - Resolved blockers → remove the entry
+   - Completed items → remove the entry
+   - Major milestones → optionally add to changelog
    - No change → skip entirely (do not touch)
 
 ---
@@ -232,8 +220,8 @@ After passing the checklist, tell the user:
 | Risky Action | Notes |
 |---|---|
 | Overwriting `MEMORY.md` existing sections | Read current content first; overwrite section in place, never append raw |
-| Deleting `STATE.md` PENDING items | Verify the trigger condition was actually met before removing |
-| Crystallization auto-execution | Proposal only — user must explicitly approve before any skill is created |
+| Deleting state entries | Verify the condition was actually met before removing |
+| Workflow promotion to skill | Proposal only — user must explicitly approve before any skill is created |
 
 ## Truthful Reporting
 
@@ -263,9 +251,9 @@ After saving files:
 
 2. **Forward-looking only**: handoff must not list "what was done this session." Only "what to do next session." Violation → handoff becomes a changelog and the actual starting point is lost.
 
-3. **No compact guidance before preservation check**: if any Phase 4 item is NO, do not tell the user to run `/compact`. Violation → incomplete work is lost in compression.
+3. **No compact guidance before preservation check**: if any Phase 4 item is NO, do not tell the user to compress. Violation → incomplete work is lost in compression.
 
-4. **Crystallization proposes only, never executes**: when Phase 1.6 detects a repeated workflow, it only suggests promotion. Automatic skill creation is forbidden — user must explicitly invoke their skill-authoring workflow. Violation → unnecessary skills generated from raw workflows pollute the library.
+4. **Workflow promotion proposes only, never executes**: when Phase 1.6 detects a repeated workflow, it only suggests that a skill might be useful. Never auto-create a skill — user must explicitly decide and invoke a skill-authoring workflow. Violation → unnecessary skills generated from one-off exploration pollute the library.
 
 ---
 
@@ -282,10 +270,10 @@ After saving files:
 | Rationalization | Counter |
 |-----------------|---------|
 | "Completed items are useful for reference, keep them" | No. Keeping them turns the handoff into a changelog. Git history preserves them. Delete is the correct action. |
-| "Phase 4 has one NO but it's probably fine..." | Invariant 3. The checklist exists precisely for this moment. NO state → do not guide compact. |
+| "Phase 4 has one NO but it's probably fine..." | Invariant 3. The checklist exists precisely for this moment. NO state → do not guide compression. |
 | "I'll save it as session-handoff-v2.md so we keep the old one too" | Invariant 1 violation. Git history keeps old versions. Versioned files cause "which one is current?" confusion that breaks context recovery. |
 | "The session was short, Phase 1.5 isn't worth running" | Phase 1.5 takes 2 minutes. Missing one permanent fact means next session re-discovers it. Run it. |
-| "Phase 1.6 detected a repetition — let me just author the skill right now" | Invariant 4 violation. User must judge whether the task will actually repeat. Auto-promotion turns one-off exploration into skills, polluting the library. Propose only. |
+| "Phase 1.6 detected a repetition — let me just author the skill right now" | Invariant 4 violation. User must judge whether the task will actually repeat. Auto-promotion turns one-off exploration into skills. Propose only. |
 | "A repeated workflow was detected but the signature is too trivial, skip it" | If it matches Phase 1.6's "non-trigger conditions," fine. But dismissing 3+ repetitions as "trivial" is usually measurement laziness. Log it to `context-log.md [ref:N]` so the next session re-evaluates. |
 
 ---
@@ -299,7 +287,9 @@ Install both or neither — they are designed as a pair.
 
 ---
 
-## In production
-Managing context across many sessions on a 12-agent system.
-Past 200 files, the handoff file became the difference between
-"pick up immediately" vs "20 min reconstructing state."
+## Proven In
+
+Session handoff workflows across multi-week development projects.
+Once a codebase grows beyond ~200 files and multiple sessions span days,
+a single handoff file becomes the difference between "pick up immediately"
+and "20 minutes reconstructing context."

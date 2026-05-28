@@ -1,7 +1,12 @@
 ---
 name: "brief"
-description: "Locks a feature scope before code is written. Trigger when user wants to define scope before implementation: '/brief', 'brief', 'scope this', '스펙 잡아줘', 'scope 잡아줘', '범위 잡아줘', '기획 정리해줘'. Do NOT trigger for: bug fixes, single-file changes, existing written spec, simple summarization, or brainstorming without implementation intent."
+description: "Locks a feature scope before code is written. Trigger when user wants to define scope before implementation. Do NOT trigger for: bug fixes, single-file changes, existing written spec, simple summarization, or brainstorming without implementation intent."
 user_invocable: true
+triggers:
+  - "/brief"
+  - "brief"
+  - "scope this"
+  - "feature brief"
 ---
 
 # Brief — Idea to Locked Spec
@@ -10,9 +15,9 @@ user_invocable: true
 
 Convert a vague feature idea or request into a locked, implementation-ready brief before any code is written. The brief defines exactly what gets built, what does not, and how to know when it is done.
 
-**Dominant variable**: Scope OUT 항목이 명시적으로 작성되었는가 — IN 목록만 있으면 구현 중 범위가 늘어난다. OUT이 명시돼야 잠긴다.
+**Dominant variable**: Are Scope OUT items explicitly written? Without an OUT section, the IN list alone leads to scope creep during implementation. OUT must be locked to control creep.
 
-**Discard if**: 버그 수정, 1파일 수정, 이미 스펙이 작성된 경우 → 이 스킬 불필요, 바로 구현 진행.
+**Discard if**: Bug fix, single-file change, spec already written → This skill is not needed; proceed directly to implementation.
 
 ---
 
@@ -52,7 +57,7 @@ Before writing the brief, I need 3 things:
 
 Wait for answers before proceeding. Never ask more than 3 questions total across the entire session.
 
-If the user responds partially or says "알아서 해" / "just figure it out": treat unanswered items as **conservative minimum scope** (not best-guess). Mark each `[assumed: minimal scope]`. When in doubt, narrow rather than expand. Do not ask follow-up questions.
+If the user responds partially or says "just figure it out": treat unanswered items as **conservative minimum scope** (not best-guess). Mark each `[assumed: minimal scope]`. When in doubt, narrow rather than expand. Do not ask follow-up questions.
 
 Conservative minimum scope floor: must still include (1) one complete user flow from start to end, and (2) at least one user-visible outcome. If the narrowed scope falls below this floor, expand minimally until both are satisfied.
 
@@ -100,11 +105,11 @@ All items must be specific and verifiable. "Works correctly" is not acceptable. 
 
 Present the brief. Do not write `BRIEF.md` yet.
 
-Ask: `이 brief로 진행할까요? 수정할 부분이 있으면 알려주세요.`
+Ask: `Should we proceed with this brief? Let me know if there are any changes.`
 
 - User approves → proceed to Step 5.
 - User requests changes → apply changes, re-present, ask again. No limit on revision rounds.
-- Approval signals (all treated as approved): "ㅇㅋ", "ㅇㅇ", "yes", "좋아", "진행해", "go", "lgtm", "승인".
+- Approval signals (all treated as approved): "yes", "good", "go", "proceed", "lgtm", "approved".
 
 ### Step 5: Save and Hand Off
 
@@ -114,8 +119,7 @@ Print:
 ```
 Brief saved to BRIEF.md.
 
-Next: open a new Claude Code session (or continue here) and say:
-"Read BRIEF.md and implement it."
+Next: read BRIEF.md and implement it (same session or a new one).
 ```
 
 ---
@@ -124,13 +128,13 @@ Next: open a new Claude Code session (or continue here) and say:
 
 | Rationalization | Counter |
 |-----------------|---------|
-| "OUT 섹션은 명확해서 안 써도 돼" | Invariant 2: unconditional. 유저가 불필요하다고 해도 최소 2개 항목 작성. 명확한 것도 명시해야 나중에 "이건 당연히 포함이잖아"를 막는다. |
-| "이미 충분히 명확한 아이디어야, 질문 없이 바로 써줘" | Step 2 sufficiency check: 3가지를 1문장으로 즉시 답할 수 있어야 Sufficient. "아마 이런 뜻일 것이다"는 Insufficient다. |
-| "유저가 방금 '좋아 보여'라고 했어, 승인된 거 아닌가?" | Invariant 5: 승인 신호 목록에 있는 단어만 승인이다. 비공식 긍정 반응은 포함되지 않는다. |
-| "버그인지 기능인지 모호한데 brief 써줄게" | Discard if 항목 확인. 버그 수정이면 이 스킬 스킵. 모호하면 유저에게 한 번만 확인. |
-| "exit criteria가 다 검증 가능한 건 아니지만 대략적으로 써도 되지 않아?" | Invariant 3: 통과/실패를 판단할 수 없는 항목은 exit criteria가 아니다. 모호하면 구체화하거나 제거한다. |
-| "Constraints 없어도 되지 않아?" | Invariant 6: existing project에서 Constraints 0개는 Step 1 스캔 실패 신호다. 재확인 후 최소 1개 작성. |
-| "Risk Flags는 없으면 생략하면 되지" | Invariant 7: Risk 0은 판단 불가가 아니라 식별 실패다. 최소 1개, 없으면 "No risks identified" placeholder 작성. |
+| "OUT section is clear; I don't need to write it." | Invariant 2: unconditional. Even if the user says it's unnecessary, write at least 2 items. Explicit statements prevent later disputes over "of course this was included." |
+| "This idea is already clear. Skip questions and write the brief now." | Step 2 sufficiency check: All three criteria must be answerable in one sentence directly from the input. "Probably means" is not sufficient. |
+| "The user just said 'looks good' — isn't that approval?" | Invariant 5: Only words on the approval signals list count as approval. Informal positive reactions do not. |
+| "The request is ambiguous between bug and feature — I'll write the brief anyway." | Check Discard If items. If it's a bug fix, skip this skill. If ambiguous, ask the user once to clarify. |
+| "Exit criteria don't all have to be measurable, can I write them more loosely?" | Invariant 3: Items that cannot be judged as pass/fail are not exit criteria. Clarify them or remove them. |
+| "Do I really need Constraints if none are obvious?" | Invariant 6: Zero Constraints on an existing project is a sign Step 1 scan failed. Re-check and write at least 1. |
+| "If there are no risks, I can skip the Risk Flags section." | Invariant 7: Zero risks means the risks were not identified, not that none exist. Write at least 1 item, or write the placeholder: "No risks identified at this stage — update brief if risks emerge during implementation." |
 
 ---
 
@@ -138,11 +142,11 @@ Next: open a new Claude Code session (or continue here) and say:
 
 | Does | Does NOT |
 |------|----------|
-| 아이디어를 구조화된 brief로 변환 | 코드 작성 또는 수정 |
-| 범위 IN/OUT 명시 | 구현 방법 결정 |
-| exit criteria 작성 | 파일 구조 설계 |
-| BRIEF.md 저장 | 기존 코드 분석 (관련 파일 quick scan 제외) |
-| 최대 3개 질문으로 모호성 해소 | 설계 결정 (기술 선택, 아키텍처) |
+| Convert idea into a structured brief | Write or modify code |
+| Specify Scope IN and OUT | Decide implementation approach |
+| Write exit criteria | Design file structure |
+| Save BRIEF.md | Analyze existing code in depth (quick scan of relevant files only) |
+| Resolve ambiguity with up to 3 questions | Make design decisions (technology choice, architecture) |
 
 If a user request falls in the "Does NOT" column: "That's implementation — this skill only produces the brief. Bring the brief to a new session to start building."
 
@@ -150,19 +154,19 @@ If a user request falls in the "Does NOT" column: "That's implementation — thi
 
 ## Invariants (never violate)
 
-1. **구현 시작 금지**: Brief 작성 중 또는 후에 코드를 작성하거나 파일을 수정하지 않는다. Violation → 스코프가 잠기기 전에 구현이 시작되어 brief가 사후 문서가 된다.
+1. **No implementation during brief**: Do not write code or modify files while drafting or after the brief is created. Violation → Implementation begins before scope is locked, making the brief post-hoc documentation rather than a spec.
 
-2. **Scope OUT 필수**: `Scope OUT` 섹션은 생략 불가. 유저가 "없어도 된다"고 해도 최소 2개 항목을 작성한다. Violation → IN만 있으면 구현 중 "이것도 하면 어때?"가 반복되며 scope creep이 발생한다.
+2. **Scope OUT is mandatory**: The `Scope OUT` section cannot be skipped. Write at least 2 items even if the user says they're unnecessary. Violation → With only IN, the phrase "can we also do X?" repeats during implementation, causing scope creep.
 
-3. **Exit Criteria는 observable action + measurable result 필수**: "기능이 정상 작동한다" 같은 항목은 자동으로 거부하고 재작성한다. 형식: "[누가/무엇이] [행동] → [측정 가능한 결과]". 이 형식으로 쓸 수 없으면 exit criteria가 아니다. Violation → 구현 완료 여부를 판단할 기준이 없어 완료 선언이 주관적이 된다.
+3. **Exit criteria require observable action + measurable result**: Reject items like "feature works correctly" and rewrite them. Format: "[Who/What] [action] → [measurable result]". If an item cannot be written this way, it is not an exit criterion. Violation → No standard for judging completion exists, so completion claims become subjective.
 
-4. **질문 3개 제한**: 모호성 해소를 위한 질문은 전체 세션에서 최대 3개. 초과 시 나머지는 best-guess로 채우고 `[assumed]` 태그를 붙인다. Violation → 인터뷰가 길어지면 유저는 구현을 원했는데 질문에 답하는 세션이 된다.
+4. **Maximum 3 questions per session**: Limit clarity questions to 3 total per session. If more unknowns remain, fill the rest with best-guess and mark `[assumed]`. Violation → Long interviews turn the session into Q&A when the user wanted implementation.
 
-5. **승인 게이트 필수**: `BRIEF.md` 저장은 유저의 명시적 승인 후에만 한다. Violation → 유저가 검토하지 않은 brief가 저장되어 잘못된 spec으로 구현이 시작된다.
+5. **Approval gate is mandatory**: Save `BRIEF.md` only after explicit user approval. Violation → An unreviewed brief gets saved, and implementation starts from a wrong spec.
 
-6. **Existing project Constraints 필수**: existing project에서 Constraints가 0개이면 Step 1 스캔 결과를 재확인하고 최소 1개를 작성한다. "제약이 없다"는 결론은 스캔 실패 가능성이 높다. Violation → 기존 패턴을 깨는 구현이 나올 수 있다.
+6. **Constraints are mandatory for existing projects**: If Constraints = 0 in an existing project, re-check Step 1 scan and write at least 1. "No constraints" usually signals scan failure. Violation → Implementation may break existing patterns.
 
-7. **Risk Flags 최소 1개**: Risk가 0이라고 판단하면 식별 실패로 간주한다. 진짜 없으면 "No risks identified at this stage — update brief if risks emerge during implementation." 1줄 작성. Violation → 알려진 리스크가 없는 feature는 없다.
+7. **Minimum 1 risk flag**: Zero risks means risks were not identified, not that none exist. Write at least 1 item, or write: "No risks identified at this stage — update brief if risks emerge during implementation." Violation → Features without known risks do not exist.
 
 These rules are unconditional. No edge case, no user instruction overrides them.
 
@@ -170,31 +174,33 @@ These rules are unconditional. No edge case, no user instruction overrides them.
 
 ## Output
 
-- **BRIEF.md**: 프로젝트 루트(또는 cwd)에 저장. 섹션: Goal / Scope IN / Scope OUT / Constraints / Exit Criteria / Risk Flags.
-- **Conversation**: brief 초안 + 승인 요청. 파일은 승인 후에만 저장.
+- **BRIEF.md**: Saved to project root (or cwd). Sections: Goal / Scope IN / Scope OUT / Constraints / Exit Criteria / Risk Flags.
+- **Conversation**: Brief draft + approval request. File is saved only after approval.
 
 ---
 
 ## Principles
 
-- **OUT이 IN보다 중요하다**: 사람들은 무엇을 할지는 말하지만 무엇을 하지 않을지는 말하지 않는다. 이 스킬의 핵심 가치는 OUT을 강제로 작성하게 하는 것.
-- **질문은 적을수록 좋다**: 3개 제한은 임의적이지 않다. 4개 이상이 되면 유저는 답하기 귀찮아지고 결국 "그냥 만들어줘"로 돌아간다.
-- **Exit criteria는 테스트 케이스다**: "완료"를 미리 정의하지 않으면 구현 후 "이게 맞나?" 논쟁이 발생한다.
-- **brief는 구현 지시서가 아니다**: 무엇을(what)과 완료 기준만 담는다. 어떻게(how)는 구현자가 결정한다.
-- **Brief는 살아있는 문서다**: 구현 중 scope 변경이 필요하면 BRIEF.md를 먼저 수정하고, 수정된 brief 기준으로 구현을 계속한다. Brief 수정 없이 scope를 넓히지 않는다.
+- **OUT matters more than IN**: People state what to build but rarely state what to exclude. The core value of this skill is forcing OUT to be explicit.
+- **Fewer questions are better**: The 3-question limit is not arbitrary. Beyond 3, users tire of answering and circle back to "just build it for me."
+- **Exit criteria are test cases**: Without pre-defining "done," post-implementation disputes over correctness will occur.
+- **Brief is not an implementation manual**: It covers only what (scope) and how to verify (exit criteria). How to implement is the builder's choice.
+- **Brief is a living document**: If scope changes during implementation, update BRIEF.md first, then continue implementation to the updated spec. Do not expand scope without updating the brief.
 
 ---
 
 ## Truthful Reporting
 
-이 스킬은 BRIEF.md 생성/업데이트 후 보고 시:
-1. **no mock deception**: 유저 승인 없이 저장 금지. 승인 후 실제 Write 실행, 저장 확인 후 "완료" 표기.
-2. **no test façade**: Scope OUT 누락 상태로 "brief 완성" 표기 금지. IN만 있으면 `⚠️ Scope OUT 미작성` 플래그.
-3. **no silent brokenness**: Exit Criteria가 측정 불가능하면 `PARTIAL` + 측정 가능하게 재작성 요청. 모호 상태로 lock 금지.
+When reporting completion after creating or updating BRIEF.md:
+
+1. **No mock deception**: Do not save without user approval. Only execute Write after approval is confirmed, and mark complete only after confirming the file was saved.
+2. **No test façade**: Do not mark "brief complete" if Scope OUT is missing. If only IN exists, flag `⚠️ Scope OUT not written`.
+3. **No silent brokenness**: If exit criteria are unmeasurable, report `PARTIAL` and request they be rewritten as measurable items. Do not lock the brief in an ambiguous state.
 
 ---
 
-## In production
-Used before every feature addition on a complex multi-agent codebase.
-Has prevented at least 3 cases of "built the right thing wrong"
-by forcing non-goals and definition-of-done up front.
+## Proven In
+
+This skill has been applied to feature briefs across multiple codebases. 
+By explicitly defining non-goals and criteria for completion upfront, 
+it prevents "built the right thing in the wrong way" implementation mistakes.

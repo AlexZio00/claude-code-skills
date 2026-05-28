@@ -34,7 +34,7 @@ Ask **at most one clarifying question** — if more than one gap exists, apply b
 Produce in this exact format:
 
 ```markdown
-# MAGIC DOC: [Short Title — noun phrase, e.g. "Use SQLite for local market data cache"]
+# [Short Title — noun phrase, e.g. "Use SQLite for local market data cache"]
 
 **Date:** YYYY-MM-DD  
 **Status:** Accepted  
@@ -72,7 +72,7 @@ Produce in this exact format:
 
 Present the draft. Ask: `Save this ADR? (yes / edit / discard)`
 
-- **yes / ㅇㅋ / ㅇㅇ / approved / lgtm / go** → proceed to Step 4
+- **yes / approved / lgtm / go** → proceed to Step 4
 - **edit** → apply changes, re-present, ask again (no limit on rounds)
 - **discard** → exit, do not save
 
@@ -126,7 +126,7 @@ ADR saved: docs/decisions/YYYY-MM-DD-<title>.md
 | "I'll add a couple of alternatives to make it look thorough" | Invariant 2: fabricated options mislead future readers about what was evaluated. "No alternatives considered." is honest and correct. |
 | "The decision is still being explored, I'll write it now to capture thinking" | Discard condition: ADR is for settled decisions. Use a comment, scratch note, or `/brief` for ongoing exploration. |
 | "Override Conditions can just say 'if requirements change' — too vague to bother writing" | Invariant 3: write it anyway. Even "if requirements change significantly" is better than nothing — it signals the condition class and invites future revisiting. |
-| "User approved verbally mid-conversation, that counts" | Step 3 approval signals are explicit: yes / ㅇㅋ / ㅇㅇ / approved / lgtm / go. Implicit positive reactions do not count. |
+| "User approved verbally mid-conversation, that counts" | Step 3 approval signals are explicit: yes / approved / lgtm / go. Implicit positive reactions do not count. |
 
 ---
 
@@ -148,7 +148,9 @@ Brief → implement → `/adr` for the non-obvious decisions made along the way.
 
 ---
 
-## In production
-10+ decisions documented — each capturing a tradeoff that
-wasn't obvious months later. Most valuable in retrospect:
-why certain safety constraints are architectural rather than conventional.
+## Proven In
+Architecture decision records work best when:
+- Multiple decisions accumulate (10+) and reveal patterns over time
+- Team members revisit past decisions to understand constraints that shaped the system
+- A future maintainer needs to understand why a particular approach was chosen (why not the obvious alternative)
+- Decisions need to be revisited in light of changed constraints

@@ -17,6 +17,29 @@ Does the handoff contain **what to do next**, or **a list of what was done**? If
 
 > **Auto-trigger signal**: If ≥5,000 tokens accumulated AND ≥3 tool calls AND ≥24h since last session — high-value context is at risk. Run this skill before starting new work (Triple Gate pattern).
 
+> **Phase 0.5 always runs** — environment warnings apply regardless of Discard. A misconfigured model ID or an oversized allow-entry list is worth surfacing even in a one-off session.
+
+---
+
+## Phase 0.5: Environment Health Check
+
+> Warning-only — never blocks session start. Read-only (no modifications).
+
+**Check 1 — Model ID** (read `~/.claude/settings.json`):
+- Verify the `"model"` field matches a known Claude Code model identifier.
+  Known valid values: `"opus"`, `"sonnet"`, `"haiku"`, `"claude-opus-4-7"`, `"claude-sonnet-4-6"`, `"claude-haiku-4-5"`, `"claude-opus-4-5"`, `"claude-sonnet-4-5"`
+- Unrecognized value → `⚠️ settings.json model ID unrecognized: "{value}" — update recommended`
+- File missing → skip silently.
+
+**Check 2 — Allow entry accumulation** (read `~/.claude/settings.local.json`):
+- Count entries in the `permissions.allow` array.
+- If count > 5 → `⚠️ settings.local.json: N allow entries accumulated — review and clean up`
+
+  Background: each session-scoped permission approval appends an entry here. Accumulated entries represent past one-time approvals that silently persist, widening the permission surface over time. More than 5 is a signal to audit and prune.
+- File missing → skip silently.
+
+**Output rule**: both checks clean → **no output** (omit Environment alert from Phase 5). Any warning → surface in Phase 5 under `**Environment alert:**`.
+
 ---
 
 ## Phase 1: Load Handoff
@@ -42,7 +65,7 @@ Scan for rules relevant to today's priorities:
 - About to commit or push → check commit-related rules
 - Debugging → check any debugging anti-patterns recorded
 
-**v2 metadata utilization (`> conf · seen · obs`, added 2026-04-28~)**:
+**v2 metadata utilization** (optional enhancement — if lessons.md includes confidence/last-seen/observation metadata):
 - `conf ≥ 0.7` (verified/core) → flag the **rule body in 1 line** as priority signal
 - `conf 0.5` (moderate) → show **title only, 1 line**
 - `conf < 0.5` (tentative/experimental) → **TOC header only** or skip (noise)
@@ -55,13 +78,13 @@ Flag each applicable rule, one line each. Skip silently if file missing.
 
 ## Phase 3: Global State Check
 
-Read `~/.claude/STATE.md` (cross-project blockers and decisions).
+If your project maintains a cross-project state file (e.g., `~/.claude/STATE.md`), read it for cross-project blockers and decisions.
 
 Check:
 - Any open decisions resolvable in this session?
 - Any active blockers you can touch now?
 
-Skip if STATE.md missing.
+Skip if the state file is missing or your project does not use one.
 
 ---
 
@@ -112,6 +135,7 @@ Output a structured briefing:
 **Lessons flagged:** [applicable rules from Phase 2, or "none"]
 **Memory alerts:** [stale refs or promotions triggered, or "none"]
 **Global:** [STATE.md items relevant to this session, or "none"]
+**Environment alert:** [Phase 0.5 warnings — omit this line if clean]
 ```
 
 Then: `Ready. What would you like to start with?`
@@ -133,9 +157,11 @@ Then: `Ready. What would you like to start with?`
 
 1. **Read-only by default**: session-start loads context — it does not modify files. The one permitted exception: promoting a `[ref:N≥3]` entry to MEMORY.md (this is a stale-detection write, not a session write). No other writes.
 
-2. **Missing file = silent skip, not error**: if `memory/session-handoff-LATEST.md`, `tasks/lessons.md`, or `memory/MEMORY.md` is missing, skip that phase without error. Never block session start on a missing file.
+2. **Missing file = silent skip, not error**: if `memory/session-handoff-LATEST.md`, `tasks/lessons.md`, `memory/MEMORY.md`, `~/.claude/settings.json`, or `~/.claude/settings.local.json` is missing, skip that phase or check without error. Never block session start on a missing file.
 
 3. **Ready signal must include Priority 1**: the output must name at least one concrete next action. "Session started" with no priority is a violation — it means the handoff has no actionable items, which is worth flagging to the user explicitly.
+
+4. **Phase 0.5 always runs**: the environment health check applies even when the main skill is discarded. A misconfigured model ID or bloated allow list is worth surfacing on any session, including first sessions and one-off questions.
 
 ---
 
@@ -166,7 +192,6 @@ Install both or install neither — designed as a pair.
 
 ---
 
-## In production
-Managing context across many sessions on a 12-agent system.
-Past 200 files, the handoff file became the difference between
-"pick up immediately" vs "20 min reconstructing state."
+## Proven In
+
+Multi-session development workflows across codebases of varying size. The handoff file becomes more valuable as project scope grows — the larger the codebase and the longer the session gap, the more critical this skill becomes for avoiding re-discovery of context.

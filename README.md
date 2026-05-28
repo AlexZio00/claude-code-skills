@@ -1,9 +1,9 @@
-# claude-code-skills v4.7
+# claude-code-skills v5.0
 
-Audit what's broken. Scaffold what's missing. Wire the AI. Assemble the team. Lock scope. Record decisions. Open sessions right. Close sessions right. Ship with confidence. Diagnose how you work.
+Audit what's broken. Scaffold what's missing. Wire the AI. Assemble the team. Lock scope. Record decisions. Open sessions right. Close sessions right. Ship with confidence. Diagnose how you work. Retro what you learned.
 
 > **Scope:** The full lifecycle pipeline for Claude Code projects — from health check to daily push gate, session management, and an AI collaboration audit that turns your own work patterns into a diagnostic.
-> Ten skills that build on each other. Each one is useful standalone; the full sequence covers setup to daily workflow to session lifecycle.
+> Thirteen skills that build on each other. Each one is useful standalone; the full sequence covers setup to daily workflow to session lifecycle.
 
 ---
 
@@ -17,9 +17,12 @@ Audit what's broken. Scaffold what's missing. Wire the AI. Assemble the team. Lo
 then:
   /session-start     at the start of every session
   /brief             before each feature
+  /freeze            before implementation (declare editable zone)
   /adr               after key design decisions
   /pre-push          before each push
   /session-checkpoint  at the end of every session
+  /retro             after milestones (extract lessons)
+  /token-audit       measure your token overhead (on-demand)
 ```
 
 **Existing project (5 min):**
@@ -34,10 +37,13 @@ then: /session-start + /session-checkpoint as daily session bookends
 ```
 /session-start      →  load handoff, flag lessons, ready signal
 /brief              →  before starting any feature
+/freeze             →  before implementation (lock editable zone)
 /adr                →  after any non-obvious design choice
 /pre-push           →  before every git push
 /session-checkpoint →  at session end, before /compact
+/retro              →  after milestones, extract lessons
 /collab-audit       →  monthly to see what patterns have shifted
+/token-audit        →  measure token overhead (on-demand)
 ```
 
 ---
@@ -63,7 +69,9 @@ Most projects have gaps they don't know about — missing Hard Rules, hardcoded 
 
 **Scale-aware:** A 5-file script won't fail for missing ROADMAP. Warnings are calibrated to project size.
 
-**In production:** Run before each sprint on a 200+ file codebase. Consistently surfaces: coverage gaps in new modules, missing .env.example entries, stale docs after refactors.
+**Safety guaranteed:** Read-only by design. Safety Layers table + Error Recovery protocol ensure partial scans report themselves as partial — never as complete.
+
+**Proven in:** Run before each sprint on production codebases. Consistently surfaces: coverage gaps in new modules, missing .env.example entries, stale docs after refactors.
 
 ---
 
@@ -84,7 +92,7 @@ Most projects skip the "invariants first" step. By the time you add Hard Rules, 
 
 **Supports:** Python · TypeScript (Next.js / API) · Java · Kotlin (Spring Boot / Android) · Go · Rust · Swift
 
-**In production:** Initialized before the first line of domain code. The CLAUDE.md and .env.example structure generated here survived 4 months and 99K LOC with minimal changes.
+**Proven in:** Initialized before writing any application code. The CLAUDE.md and .env.example structure scales from single-file scripts to large multi-module codebases with minimal adjustment.
 
 ---
 
@@ -122,7 +130,7 @@ The harness layer determines how productive every Claude Code session will be. B
 
 **Use this AFTER `/project-init`** — project-init scaffolds the codebase, harness-init scaffolds the AI orchestration layer on top.
 
-**In production:** The project running on this infrastructure: 3 daily scheduled jobs, a monitoring bot, a multi-tab analytics dashboard, and a 12-agent pipeline — all coordinated through the rules/skills/agents structure harness-init establishes.
+**Proven in:** Production systems running multi-agent orchestration, scheduled jobs, structured memory management, and tiered rule enforcement — all coordinated through the rules/skills/agents structure harness-init establishes.
 
 ---
 
@@ -156,7 +164,7 @@ The orchestrator's correction loop catches implementation drift automatically �
 
 **Use this AFTER `/harness-init`** — harness-init sets the rules, team-init assembles the agents that work within those rules.
 
-**In production:** Bootstrapped a 12-agent pipeline with specialized roles across data, analysis, alerting, and reporting. The AGENTS.md files generated here are still the source of truth after 4 months.
+**Proven in:** Bootstrapped agent pipelines with specialized roles across multiple domains. The agent files generated here become the source of truth for team coordination and drift detection.
 
 ---
 
@@ -180,7 +188,40 @@ People specify what to build but rarely specify what NOT to build. The skill's c
 
 **Discard if:** bug fix, single-file change, or a spec is already written.
 
-**In production:** Used before every feature addition on a complex multi-agent codebase. Has prevented at least 3 cases of "built the right thing wrong" by forcing non-goals and definition-of-done up front.
+**Proven in:** Used before every feature addition on production codebases. Prevents "built the right thing wrong" by forcing non-goals and definition-of-done up front.
+
+---
+
+#### `/freeze` — Scope Lock
+
+Declares the editable zone before implementation starts. Everything outside the declared zone is frozen (read-only) for the duration of the task.
+
+**What it does:**
+- Parses your input to classify files/modules as editable, frozen, or read-only
+- Emits a `FROZEN SCOPE` block with explicit rules
+- Stops immediately after declaration — no implementation, no agents
+- If scope is ambiguous, asks one clarifying question; if still vague, freezes the broader scope
+
+**Output format:**
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🔒 FROZEN SCOPE — [task description]
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✅ EDITABLE: [files]
+❌ FROZEN: [everything else]
+⚠️  READ-ONLY: [reference-only files]
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
+
+**Why it matters:**
+Scope creep doesn't feel like scope creep while it's happening — it feels like "just fixing this while I'm here." `/freeze` externalizes the boundary so any deviation is visible and requires a conscious override.
+
+**Pair with `/brief`:**
+`/brief` locks WHAT to build and what NOT to build. `/freeze` locks WHICH FILES to touch. Brief before design; freeze before implementation.
+
+**Discard if:** pure exploration with no planned modifications, single-file change under 10 lines, or still in brainstorming phase.
+
+**Origin:** Adapted from [garrytan/gstack](https://github.com/garrytan/gstack) freeze pattern. Key difference: gstack freeze is global session file-list based; this version is task-scoped declaration based — no session state persistence required.
 
 ---
 
@@ -200,7 +241,7 @@ Future sessions — and future team members — need to understand what alternat
 **Pair with `/brief`:**
 `/brief` locks scope before implementation. `/adr` records the non-obvious technical choices made during or after. Brief → implement → `/adr` for the decisions that aren't obvious from the code.
 
-**In production:** 10+ decisions documented — each capturing a tradeoff that wasn't obvious months later. Most valuable in retrospect: why certain safety constraints are architectural rather than conventional.
+**Proven in:** Documenting design decisions across long-running projects. Most valuable in retrospect: why certain constraints are architectural rather than conventional — context that's invisible from code alone.
 
 ---
 
@@ -244,7 +285,7 @@ Mandatory pipeline that runs automatically before every `git push`. Blocks on se
 
 **Installation note:** `scripts/scan_secrets.pl` must be co-located with `SKILL.md`. The scanner is called via `find ~/.claude -name "scan_secrets.pl"` so it works regardless of where you install the skill.
 
-**In production:** Running on a 99K LOC Python project, 1,326 tests, 200+ files. Every push goes through this gate — catches credential leaks, dependency drift, and logic errors before they reach main. 4+ months in production.
+**Proven in:** Production codebases with hundreds of tests and multi-file changes. Every push goes through this gate — catches credential leaks, dependency drift, and logic errors before they reach main.
 
 ---
 
@@ -257,6 +298,7 @@ Mandatory pipeline that runs automatically before every `git push`. Blocks on se
 Loads saved session state and produces a concrete starting point within 60 seconds of invoking.
 
 **What it does:**
+- **Phase 0.5 (always runs):** checks `~/.claude/settings.json` model ID and counts `~/.claude/settings.local.json` allow entries — warns if > 5 accumulated (silent permission surface growth). Runs even on first sessions and discarded sessions.
 - Reads `memory/session-handoff-LATEST.md` (auto-loaded via frontmatter) — extracts Priority 1, open decisions, blockers, context notes
 - Reads `tasks/lessons.md` — flags any correction rules relevant to today's work
 - Spot-checks `memory/MEMORY.md` for 1–2 stale references (file paths, function names mentioned in handoff)
@@ -270,15 +312,16 @@ Priority 2: [if present]
 Open decisions: [list or "none"]
 Lessons flagged: [applicable rules or "none"]
 Memory alerts: [stale refs or "none"]
+Environment alert: [model ID / allow entries warning — omit if clean]
 ```
 
 **Auto-trigger (Triple Gate):** ≥5,000 tokens accumulated AND ≥3 tool calls AND ≥24h since last session → high-value context is at risk. Run this skill before starting new work.
 
 **Dominant variable:** Does the handoff contain "what to do next" or "what was done"? If it reads like a completion log, it was written wrong — flag this before proceeding.
 
-**Discard if:** first session on the project (no handoff file), user says "start fresh."
+**Discard if:** first session on the project (no handoff file), user says "start fresh." (Phase 0.5 still runs.)
 
-**In production:** Managing context across 50+ sessions on a 12-agent system. Past 200 files, loading the handoff takes under 60 seconds — without it, the same time goes to reconstructing "where was I."
+**Proven in:** Managing context across dozens of sessions on multi-agent codebases. The handoff loads in under 60 seconds — without it, the same time goes to reconstructing "where was I."
 
 ---
 
@@ -306,7 +349,7 @@ Completed items are deleted, not archived. Git history preserves them. A handoff
 
 **Discard if:** no code changes and no open decisions this session. `/compact` is a Claude Code CLI built-in — this skill cannot call it directly.
 
-**In production:** Running across 50+ sessions on a 12-agent codebase. The handoff file is the single artifact that survives `/compact` — every session that skips writing it costs the next session 15–20 minutes of reconstruction.
+**Proven in:** Multi-week development projects across dozens of sessions. The handoff file is the single artifact that survives `/compact` — every session that skips writing it costs the next session 15–20 minutes of reconstruction.
 
 ---
 
@@ -340,7 +383,72 @@ Psychological analysis and behavioral feedback are intentionally combined. Separ
 **Why it matters:**
 AI amplifies your existing work patterns — good and bad. Most people don't know which patterns are costing them until they see them documented with evidence.
 
-**In production:** Run periodically on a project where Claude Code has touched 200+ files over 4 months. Catches pattern drift — where early architectural decisions get quietly undermined as scale grows.
+**Proven in:** Periodic audits across multi-month projects. Catches pattern drift — where early architectural decisions get quietly undermined as scale grows.
+
+---
+
+#### `/retro` — Milestone Retrospective
+
+After a feature or sprint completes, extracts what went wrong, what went right, identifies recurring patterns, and writes actionable lessons to `tasks/lessons.md`.
+
+**What it does:**
+- **Phase 1**: Declares milestone scope (name, duration, key files)
+- **Phase 2**: Collects up to 5 friction points with root causes — not symptoms
+- **Phase 3**: Collects up to 3 wins — approaches that worked and should be repeated
+- **Phase 4**: Identifies patterns across friction points (≥2 sharing the same root)
+- **Phase 5**: Writes lessons to `tasks/lessons.md` — each with a trigger condition and alternative action. Checks for duplicates before writing; updates `obs` and `seen` on existing matches
+- **Phase 6** (optional): Summary block for milestones spanning 3+ sessions
+
+**Difference from session-checkpoint Reflexion:**
+
+| | session-checkpoint Reflexion | /retro |
+|---|---|---|
+| Scope | Single session | Milestone / feature / sprint |
+| Trigger | Every checkpoint | After major completion |
+| Depth | Shallow (3 items) | Deep (root cause + pattern) |
+
+**Lesson format:**
+```
+### [YYYY-MM-DD] {lesson title}
+> conf: 0.5 · seen: YYYY-MM-DD · obs: 1
+
+When X happens, do Y instead of Z.
+Source: /retro — {milestone name}
+```
+
+**Why it matters:**
+Session-level reflection captures what went wrong today. Milestone-level retro catches patterns that only emerge after multiple sessions — wrong assumptions that got re-confirmed, agent misroutes that recurred, integration gaps that kept biting. The pattern extract step is what separates a retro from a complaint list.
+
+**Discard if:** session just started, no changes were made, or the milestone was trivial (1 file, under 10 min) — session-checkpoint Reflexion is sufficient.
+
+---
+
+#### `/token-audit` — Token Overhead Measurement
+
+Measures your actual Claude Code token overhead from session JSONL data and generates a personalized infographic showing where your context budget goes.
+
+**What it does:**
+- **Step 1**: Measures your setup — CLAUDE.md sizes, rules word counts, skills inventory, hooks/MCPs/plugins
+- **Step 2**: Analyzes your 5 most recent session JSONLs — tool call distribution, file re-reads, skill loads, agent spawns
+- **Step 3**: Computes turn-weighted overhead % across 8 categories (config baseline, tool definitions, memory re-reads, skill loading, agent overhead, hook injection, cache misses, plugin autoload)
+- **Step 4** (optional): Generates a dark-theme 6-panel infographic (`outputs/token_audit_infographic.png`) — stats card, pie chart, comparison bar vs benchmark, tool distribution, file re-read heatmap, quick wins
+- **Step 5–6**: Reports findings against benchmark and surfaces top 3 quick wins with estimated token savings
+
+**Why turn-weighted averaging:**
+A 2-turn session and a 100-turn session carry the same fixed overhead but wildly different productive output. Simple averaging inflates apparent overhead. Turn-weighting gives long sessions proportionally more influence.
+
+**Benchmark:**
+
+| Setup type | Typical overhead | Productive % |
+|-----------|-----------------|--------------|
+| Minimal (no skills, few rules) | 15–25% | 75–85% |
+| Standard (5–10 skills, rules) | 35–50% | 50–65% |
+| Heavy (20+ skills, agent system) | 50–65% | 35–50% |
+| Over-engineered | 70%+ | <30% |
+
+**Prerequisites:** `python3` required (standard library only for Steps 1–3 + 5–6). `matplotlib` optional for infographic. `ccusage` optional for actual spend data.
+
+**Discard if:** you want cost totals or billing data only — this measures overhead *structure*, not spend.
 
 ---
 
@@ -350,7 +458,7 @@ AI amplifies your existing work patterns — good and bad. Most people don't kno
 # macOS / Linux
 SKILLS_DIR=~/.claude/skills
 
-mkdir -p $SKILLS_DIR/{brief,adr,project-check,project-init,harness-init,team-init,pre-push/scripts,collab-audit,session-start,session-checkpoint}
+mkdir -p $SKILLS_DIR/{brief,adr,project-check,project-init,harness-init,team-init,pre-push/scripts,collab-audit,session-start,session-checkpoint,freeze,retro,token-audit}
 
 cp brief/SKILL.md                $SKILLS_DIR/brief/SKILL.md
 cp adr/SKILL.md                  $SKILLS_DIR/adr/SKILL.md
@@ -363,13 +471,16 @@ cp pre-push/scripts/scan_secrets.pl $SKILLS_DIR/pre-push/scripts/scan_secrets.pl
 cp collab-audit/SKILL.md         $SKILLS_DIR/collab-audit/SKILL.md
 cp session-start/SKILL.md        $SKILLS_DIR/session-start/SKILL.md
 cp session-checkpoint/SKILL.md   $SKILLS_DIR/session-checkpoint/SKILL.md
+cp freeze/SKILL.md               $SKILLS_DIR/freeze/SKILL.md
+cp retro/SKILL.md                $SKILLS_DIR/retro/SKILL.md
+cp token-audit/SKILL.md          $SKILLS_DIR/token-audit/SKILL.md
 ```
 
 ```bat
 :: Windows
 set SKILLS=%USERPROFILE%\.claude\skills
-for %d in (brief adr project-check project-init harness-init team-init pre-push collab-audit session-start session-checkpoint) do mkdir "%SKILLS%\%d" 2>nul
-for %d in (brief adr project-check project-init harness-init team-init pre-push collab-audit session-start session-checkpoint) do copy %d\SKILL.md "%SKILLS%\%d\SKILL.md"
+for %d in (brief adr project-check project-init harness-init team-init pre-push collab-audit session-start session-checkpoint freeze retro token-audit) do mkdir "%SKILLS%\%d" 2>nul
+for %d in (brief adr project-check project-init harness-init team-init pre-push collab-audit session-start session-checkpoint freeze retro token-audit) do copy %d\SKILL.md "%SKILLS%\%d\SKILL.md"
 mkdir "%SKILLS%\pre-push\scripts" 2>nul
 copy pre-push\scripts\scan_secrets.pl "%SKILLS%\pre-push\scripts\scan_secrets.pl"
 ```
@@ -378,6 +489,7 @@ Invoke in any Claude Code session:
 
 ```
 /brief                # lock scope before implementation
+/freeze               # declare editable zone before writing code
 /adr                  # record a design decision (after it's made)
 /project-check        # audit an existing project (read-only)
 /project-init         # scaffold a new project
@@ -387,6 +499,8 @@ Invoke in any Claude Code session:
 /collab-audit         # diagnose your AI collaboration patterns
 /session-start        # open a session — load handoff + lessons
 /session-checkpoint   # close a session — save state before /compact
+/retro                # milestone retrospective — extract lessons
+/token-audit          # measure your actual token overhead
 ```
 
 ---
@@ -413,13 +527,15 @@ then: session-start + session-checkpoint as daily bookends
 ```
 /session-start       → load context, flag lessons, ready signal
 /brief               → before each feature (scope OUT mandatory)
+/freeze              → before implementation (declare editable zone)
   implement
 /adr                 → after non-obvious design choices
 /pre-push            → before every git push
 /session-checkpoint  → at session end, before /compact
+/retro               → after milestone completes (extract lessons)
 ```
 
-The ten skills map to the full project lifecycle:
+The thirteen skills map to the full project lifecycle:
 
 | Phase | Category | Skill | Frequency | Benefit |
 |-------|----------|-------|-----------|---------|
@@ -428,11 +544,14 @@ The ten skills map to the full project lifecycle:
 | Wire AI | Setup | `/harness-init` | Once | Every future session starts with full context |
 | Build team | Setup | `/team-init` | Once | Implementation drift caught automatically |
 | **Lock scope** | **Workflow** | **`/brief`** | **Before each feature** | **Scope OUT defined before code starts** |
+| **Lock files** | **Workflow** | **`/freeze`** | **Before implementation** | **Editable zone declared, scope creep impossible** |
 | **Record decisions** | **Workflow** | **`/adr`** | **After key choices** | **Future sessions know why, not just what** |
 | **Ship daily** | **Workflow** | **`/pre-push`** | **Every push** | **Secrets, tests, critical findings blocked before remote** |
 | **Open session** | **Session** | **`/session-start`** | **Every session** | **Priority 1 in 60 seconds, lessons loaded** |
 | **Close session** | **Session** | **`/session-checkpoint`** | **Every session** | **Nothing lost to context compression** |
 | Reflect | Quality | `/collab-audit` | Periodic | Work pattern blind spots surfaced with evidence |
+| **Learn** | **Quality** | **`/retro`** | **After milestones** | **Recurring patterns extracted, actionable lessons written** |
+| Measure | Quality | `/token-audit` | On-demand | Actual token overhead measured, top 3 quick wins surfaced |
 
 > **Standalone use:** Each skill works independently. `/pre-push` works on any project — it auto-detects the language and only runs relevant checks. `/session-start` and `/session-checkpoint` work on any project that has `memory/session-handoff-LATEST.md` (generated by `/harness-init`).
 
@@ -452,6 +571,9 @@ The ten skills map to the full project lifecycle:
 | `/collab-audit` | After 2+ weeks of active use. Or: sessions are getting less productive and you can't pinpoint why. |
 | `/session-start` | At the start of every session where prior work exists. Especially: after a break, after switching tasks, after a long session the day before. |
 | `/session-checkpoint` | Before running `/compact`, switching major tasks, or ending a session. Whenever you want the next session to start with full context. |
+| `/freeze` | Right before starting implementation — after `/brief` locked what to build, use `/freeze` to lock which files to touch. Also useful mid-session when you realize the scope is drifting. |
+| `/retro` | After a feature or sprint completes, especially if it spanned multiple sessions. Run when you want to extract recurring patterns — not just what went wrong once, but what kept going wrong. |
+| `/token-audit` | When sessions feel slow or you suspect too much context is overhead. Or: after adding new skills, rules, or MCPs — measure the actual token impact. |
 
 ---
 
@@ -501,10 +623,50 @@ Each file has a specific role. `/session-checkpoint` writes to all four. `/sessi
 - [x] `/adr` — architecture decision record (context mandatory, no fabricated alternatives, override conditions required)
 - [x] `/session-start` — session open (load handoff + lessons + memory spot-check → ready signal)
 - [x] `/session-checkpoint` — session close (entity extraction + handoff rewrite + memory save + preservation check)
+- [x] `/freeze` — scope lock (declare editable zone before implementation, prevent scope creep)
+- [x] `/retro` — milestone retrospective (friction points → pattern extract → actionable lessons)
+- [x] `/token-audit` — token overhead measurement (actual JSONL analysis → infographic → top 3 quick wins)
 
 ---
 
 ## Changelog
+
+### v5.0 — Three new skills + session health check + safety infrastructure (2026-05-28)
+
+**New skills (3):**
+
+**`/freeze`** — Scope lock before implementation:
+- Parses user input to classify files as editable, frozen, or read-only
+- Emits a `FROZEN SCOPE` block and stops — no code generation, no agents
+- Ambiguous scope → one clarifying question; still vague → freeze the broader scope
+- Task-scoped declaration (no session state), adapted from [garrytan/gstack](https://github.com/garrytan/gstack) freeze pattern
+
+**`/retro`** — Milestone retrospective:
+- 6-phase pipeline: scope declaration → friction points (root cause, not symptom) → wins (what went right) → pattern extract → lessons write → optional summary block
+- Duplicate check via `Grep` against `tasks/lessons.md` before writing — updates `obs`/`seen` on matches
+- All lessons include `> conf · seen · obs` v2 metadata (compatible with `/session-start` priority loading)
+- Complements session-checkpoint Reflexion (session-scoped) — retro is milestone-scoped and goes deeper
+
+**`/token-audit`** — Token overhead measurement:
+- Measures actual Claude Code token overhead from your session JSONL and generates a personalized infographic
+- Computes per-turn breakdown: context file load, rules overhead, memory load, skill activation, tool use
+- Surfaces top 3 quick wins to reduce overhead without removing useful context
+- **Requires `python3`** (standard library only for Steps 1–3 + 5–6). Infographic (Step 4) needs `pip install matplotlib` — optional, text-only path available without it
+
+**Enhancements to existing skills:**
+
+**`/session-start`** — new Phase 0.5: Environment Health Check:
+- Runs on every session start, including discarded sessions and first-ever sessions
+- **Check 1**: verifies `~/.claude/settings.json` model ID against known-valid Claude identifiers — flags unrecognized values
+- **Check 2**: counts `permissions.allow` entries in `~/.claude/settings.local.json` — warns if > 5 (accumulated session-scoped approvals silently widen the permission surface)
+- Both checks clean → no output. Any warning → surfaces in the ready signal under `**Environment alert:**`
+- New Invariant 4: Phase 0.5 always runs regardless of Discard conditions
+
+**`/project-check`** — two new structural sections:
+- **Safety Layers**: explicit table of blocked actions (file writes, test execution, secret removal) mapped to Invariants — makes the read-only guarantee auditable
+- **Error Recovery**: failure classification table for `tool_failure` / `missing_data` / `input_error` with explicit recovery paths — a partial scan now reports itself as partial, never as complete
+
+---
 
 ### v4.7 — Pre-push resilience + session improvements + internal ref cleanup (2026-05-07)
 
