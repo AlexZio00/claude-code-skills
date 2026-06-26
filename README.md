@@ -1,10 +1,10 @@
 🌐 **English** | [한국어](docs/README.ko.md) | [日本語](docs/README.ja.md) | [中文](docs/README.zh.md) | [Español](docs/README.es.md)
 
-# claude-code-skills v6.0
+# sovereign-skills v6.2
 
-10 skills for the full Claude Code project lifecycle — from setup to daily workflow to session management. Each skill is useful standalone; the full sequence covers everything.
+12 skills for the full Claude Code project lifecycle — from setup to daily workflow to code review to session management. Each skill is useful standalone; the full sequence covers everything.
 
-> **What changed in v6.0:** Consolidated from 13 to 10 skills. `harness-init` + `team-init` merged into `setup`. `brief` + `adr` merged into `scope`. `retro` absorbed into `session-checkpoint`. `token-audit` removed (use `npx ccusage` CLI). New: `goal-lock` — agent discipline engine that prevents scope drift and success masquerading.
+> **What changed in v6.2:** New: `code-autopsy` — 12Q quantified code review with 4-axis scoring, severity anchors, deployment verdict, and CapCode/CEF meta-detection. Also new: `stepback` — one-shot perspective reset. All 10 existing skills upgraded.
 
 ---
 
@@ -19,6 +19,8 @@ then daily:
   /scope              before each feature (define IN/OUT/exit criteria)
   /freeze             before implementation (declare editable zone)
   /goal-lock          lock the goal, enforce PLAN→DO→VERIFY loop
+  /stepback           anytime — zoom out, check direction, 10 lines
+  /code-autopsy       12Q code review with severity scoring + verdict
   /pre-push           before each push (secrets scan + agent review)
   /session-checkpoint at the end of every session
 ```
@@ -26,7 +28,7 @@ then daily:
 **Existing project (5 min):**
 ```
 /project-check      →  Score across 4 dimensions + gap list by severity
-/collab-audit       →  13-section AI collaboration diagnostic from your work patterns
+/collab-audit       →  14-section AI collaboration diagnostic from your work patterns
 ```
 
 ---
@@ -46,8 +48,14 @@ then daily:
 |-------|-------------|
 | [scope](scope/) | Define what's IN, what's OUT, and exit criteria before implementation. Quick mode (3 questions) or Full mode (layered spec) |
 | [freeze](freeze/) | Declare the editable zone — everything outside is frozen. Prevents scope creep during implementation |
-| [goal-lock](goal-lock/) | **New.** Agent discipline engine — locks the goal, enforces PLAN→DO→VERIFY→FINALIZE→OUTPUT loop, detects 11 success masquerading patterns |
+| [goal-lock](goal-lock/) | Agent discipline engine — locks the goal, enforces PLAN→DO→VERIFY→FINALIZE→OUTPUT loop, detects 11 success masquerading patterns |
 | [pre-push](pre-push/) | Mandatory pre-push pipeline — secrets scan (12 patterns), build/test, lint, parallel AI code review. Blocks push on Critical/High findings |
+
+### Perspective
+
+| Skill | What it does |
+|-------|-------------|
+| [stepback](stepback/) | **New.** One-shot perspective reset — generates 1 abstract reframing question + 3 quick checks (scope drift, side effects, better approach) in under 10 lines. Use anytime during work |
 
 ### Session Management
 
@@ -56,12 +64,18 @@ then daily:
 | [session-start](session-start/) | Load handoff from last session, review lessons, health check, output "ready" signal with priority action |
 | [session-checkpoint](session-checkpoint/) | Save session context before compact — handoff file, memory updates, lesson extraction, reflexion (what went wrong, what to do differently) |
 
+### Code Review
+
+| Skill | What it does |
+|-------|-------------|
+| [code-autopsy](code-autopsy/) | **New.** 12Q quantified code review — 4-axis scoring (Security/Stability/Robustness/Operability), severity anchors, deployment verdict (SHIP/FIX/RISKY/BLOCK), factuality gate. Backed by empirical evidence (Johnson 2019, Parnas 1972). Also works as a standalone prompt in any LLM |
+
 ### Quality
 
 | Skill | What it does |
 |-------|-------------|
 | [project-check](project-check/) | Scan existing project across 4 dimensions: Infrastructure, Security, Quality, Harness. Gaps ordered by severity |
-| [collab-audit](collab-audit/) | 13-section AI collaboration audit — analyzes your actual work patterns (not surveys) to generate behavioral profile, blind spots, and growth direction |
+| [collab-audit](collab-audit/) | 14-section AI collaboration audit — analyzes your actual work patterns (not surveys) to generate behavioral profile, blind spots, and growth direction |
 
 ---
 
@@ -75,14 +89,18 @@ then daily:
 ┌─────────────────── Daily Loop ─────────────────────┐
 │  /session-start                                     │
 │       ↓                                             │
-│  /scope → /freeze → /goal-lock → work → /pre-push  │
+│  /scope → /freeze → /goal-lock → work                │
+│       → /stepback (anytime) → /code-autopsy           │
+│       → /pre-push                                     │
 │       ↓                                             │
 │  /session-checkpoint                                │
 └─────────────────────────────────────────────────────┘
          ↓
 ┌─────────────────── On Demand ──────────────────────┐
-│  /project-check    (health audit)                   │
-│  /collab-audit     (behavioral diagnostic)          │
+│  /stepback         (perspective reset — anytime)      │
+│  /project-check    (health audit)                    │
+│  /code-autopsy     (12Q code review — any LLM)       │
+│  /collab-audit     (behavioral diagnostic)           │
 └─────────────────────────────────────────────────────┘
 ```
 
@@ -96,8 +114,8 @@ Each skill is a standalone directory with a `SKILL.md` file. Copy the ones you w
 
 ```bash
 # Install all skills
-git clone https://github.com/AlexZio00/claude-code-skills.git
-cd claude-code-skills
+git clone https://github.com/AlexZio00/sovereign-skills.git
+cd sovereign-skills
 for d in */; do [ -f "$d/SKILL.md" ] && cp -r "$d" ~/.claude/skills/; done
 
 # Or install one skill
@@ -110,18 +128,64 @@ This repo is a Claude Code marketplace. Register it once and browse/install skil
 
 ```bash
 # Add sovereign-plugins marketplace in Claude Code
-# Settings → Plugins → Add Marketplace → https://github.com/AlexZio00/claude-code-skills.git
+# Settings → Plugins → Add Marketplace → https://github.com/AlexZio00/sovereign-skills.git
 ```
 
 Each skill also includes standalone `.claude-plugin/plugin.json` metadata.
 
 Skills are invoked by typing the trigger command (e.g., `/goal-lock`) in Claude Code. Claude reads the SKILL.md and follows the instructions.
 
+### Option C: Codex / Cursor (npx)
+
+Each skill includes `agents/openai.yaml` for Codex compatibility:
+
+```bash
+# Install a skill for Codex
+npx skills add AlexZio00/sovereign-skills --skill goal-lock --agent codex -g -y
+
+# Install a skill for Cursor
+npx skills add AlexZio00/sovereign-skills --skill goal-lock --agent cursor -g -y
+
+# Install a skill for Claude Code (alternative to Option A)
+npx skills add AlexZio00/sovereign-skills --skill goal-lock --agent claude-code -g -y
+```
+
+The SKILL.md content is universal — it works with any LLM that reads markdown instructions.
+
 ### Requirements
 
-- [Claude Code](https://claude.ai/code) CLI, desktop app, or web app (claude.ai/code)
-- Skills directory: `~/.claude/skills/` (created automatically by Claude Code)
+- **Claude Code**: CLI, desktop app, or web app ([claude.ai/code](https://claude.ai/code))
+- **Codex**: OpenAI Codex with `npx skills` support
+- **Cursor**: Cursor IDE with skill plugin support
+- Skills directory: `~/.claude/skills/` (Claude Code) or agent-specific path
 - `pre-push` requires Perl (for `scan_secrets.pl` — included)
+
+---
+
+## What's New in v6.2
+
+### Added
+- **stepback** — One-shot perspective reset. Generates 1 abstract reframing question (DeepMind step-back pattern) + 3 quick checks (scope drift, side effects, better approach) in under 10 lines. Read-only, no agents, no code. Use anytime during implementation to check if you're solving the right problem at the right level. Source: team-attention/hoyeon.
+
+### Updated
+- **code-autopsy** — Added Meta-Detection Gates: CapCode ceiling metric for score gaming detection, CEF fabrication detection for constraint-evasive fake errors.
+- **collab-audit** — 13→14 sections. New Section 12: Thinking Level Trajectory (5-Level model from Information Requester to Thought Designer + temporal change tracking + AI attribution correction).
+- **goal-lock** — Added Ralph Wiggum early-completion detection (12th masquerading pattern) + verification traceability in VERIFY stage (every claim must trace to an actual tool call).
+- **session-checkpoint** — Added handoff clarity self-check (2 anchor questions after handoff writing).
+- **session-start** — Added Context Rot Prevention (sliding window for stale handoff entries).
+- **pre-push** — Added 3-IOC Supply Chain Check for newly added dependencies.
+- **scope** — Added Contraindication field (conditions where the chosen approach is NOT suitable).
+- **freeze** — Added Thaw Protocol (formal unfreeze workflow with blast radius check, 3-thaw warning).
+- **project-init** — Extended `.env.example` template (OAuth, external services, monitoring sections) + Security Baseline notes.
+- **project-check** — Added Score Delta Tracking (compare current vs previous scan results).
+- **setup** — Added Redesign Protocol for Tier 0 violation test failures (3-option escalation).
+
+---
+
+## What's New in v6.1
+
+### Added
+- **code-autopsy** — 12Q quantified code review prompt (Code Autopsy v7.0). 12 analysis questions covering design through observability. 4-axis composite scoring (Security × 0.35 + Stability × 0.30 + Robustness × 0.20 + Operability × 0.15). Severity Anchor Table with weighted formula. Deployment verdict with CRITICAL hard cap. Factuality Gate (self-verify before reporting). Cross-file impact analysis. Quick mode and Diff mode. Backed by: Google eng-practices, Johnson et al. 2019, Parnas 1972. Works as a standalone prompt in any LLM — not Claude Code exclusive.
 
 ---
 
@@ -151,14 +215,14 @@ Skills are invoked by typing the trigger command (e.g., `/goal-lock`) in Claude 
 
 ## Agentic Design Patterns Coverage
 
-These 10 skills implement 15 of the 25 known agentic design patterns ([Gulli 2026](https://books.google.com/books/about/Agentic_Design_Patterns.html?id=QqR20QEACAAJ), [Sairahul 2026](https://x.com/sairahul1/status/2069045570556383464)):
+These 12 skills implement 17 of the 25 known agentic design patterns ([Gulli 2026](https://books.google.com/books/about/Agentic_Design_Patterns.html?id=QqR20QEACAAJ), [Sairahul 2026](https://x.com/sairahul1/status/2069045570556383464)):
 
 | Pattern | Implemented by | How |
 |---------|---------------|-----|
 | **Sequential Pipeline** | session-start → scope → goal-lock → pre-push → checkpoint | Full lifecycle chain |
 | **Parallel Execution** | pre-push | Parallel AI code review agents |
 | **Loop (Retry)** | goal-lock | VERIFY fail → PLAN re-entry, capped retries |
-| **Review & Critique** | pre-push | Independent code-reviewer + security-reviewer |
+| **Review & Critique** | pre-push, code-autopsy | Independent code-reviewer + security-reviewer; 12Q structured review |
 | **Iterative Refinement** | goal-lock | PLAN→DO→VERIFY→FINALIZE until DONE EVIDENCE passes |
 | **Coordinator/Router** | setup | Agent routing rules generation |
 | **Plan-and-Execute** | goal-lock, scope | Plan reviewable before execution |
@@ -170,6 +234,7 @@ These 10 skills implement 15 of the 25 known agentic design patterns ([Gulli 202
 | **Guardrails/Safety** | goal-lock | 11 success masquerading patterns detected |
 | **Memory Management** | session-checkpoint | Handoff file + memory updates + lesson extraction |
 | **Goal Setting** | goal-lock | GOAL + DONE EVIDENCE input sheet |
+| **Step-Back Abstraction** | stepback | DeepMind step-back: concrete → abstract principle |
 
 ---
 

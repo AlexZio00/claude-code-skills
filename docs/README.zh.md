@@ -1,10 +1,10 @@
 [English](../README.md) | [한국어](README.ko.md) | [日本語](README.ja.md) | 🌐 **中文** | [Español](README.es.md)
 
-# claude-code-skills v6.0
+# sovereign-skills v6.2
 
-覆盖 Claude Code 项目完整生命周期的 10 个技能 — 从初始设置到日常工作流，再到会话管理。每个技能可独立使用，完整序列覆盖所有环节。
+覆盖 Claude Code 项目完整生命周期的 12 个技能 — 从初始设置到日常工作流、代码审查，再到会话管理。每个技能可独立使用，完整序列覆盖所有环节。
 
-> **v6.0 变更：** 从 13 个整合为 10 个。`harness-init` + `team-init` → `setup`。`brief` + `adr` → `scope`。`retro` 并入 `session-checkpoint`。移除 `token-audit`（使用 `npx ccusage` CLI）。新增：`goal-lock` — 智能体纪律引擎。
+> **v6.2 变更：** 新增：`code-autopsy` — 12Q量化代码审查。4轴评分（Security/Stability/Robustness/Operability）、严重性锚定、部署判定（SHIP/FIX/RISKY/BLOCK）、CapCode/CEF元检测。作为独立提示词可在任何LLM中使用。新增：`stepback` — 一次性视角重置。全部10个现有技能升级。
 
 ---
 
@@ -19,6 +19,8 @@
   /scope              实现功能前（定义 IN/OUT/退出标准）
   /freeze             实现前（声明可编辑区域）
   /goal-lock          锁定目标，强制 PLAN→DO→VERIFY 循环
+  /stepback           随时 — 方向确认，10行
+  /code-autopsy       12Q代码审查 + 严重性评分 + 部署判定
   /pre-push           push 前（密钥扫描 + AI 审查）
   /session-checkpoint 会话结束时
 ```
@@ -26,7 +28,7 @@
 **已有项目（5分钟）：**
 ```
 /project-check      →  4 维度评分 + 按严重度排序的差距列表
-/collab-audit       →  13 节 AI 协作诊断
+/collab-audit       →  14 节 AI 协作诊断
 ```
 
 ---
@@ -49,6 +51,18 @@
 | [goal-lock](../goal-lock/) | **新增。** 智能体纪律引擎 — 锁定目标，强制 PLAN→DO→VERIFY→FINALIZE→OUTPUT 循环，检测 11 种成功伪装模式 |
 | [pre-push](../pre-push/) | 强制 pre-push 管道 — 密钥扫描（12 种模式）、构建/测试、lint、并行 AI 代码审查。发现 Critical/High 时阻止 push |
 
+### 代码审查
+
+| 技能 | 功能 |
+|------|------|
+| [code-autopsy](../code-autopsy/) | 12Q量化代码审查 — 4轴评分（Security/Stability/Robustness/Operability）、严重性锚定表、部署判定（SHIP/FIX/RISKY/BLOCK）、Factuality Gate、CapCode评分gaming检测、CEF伪装错误检测。作为独立提示词可在任何LLM中使用 |
+
+### 视角转换
+
+| 技能 | 功能 |
+|------|------|
+| [stepback](../stepback/) | **新增。** 一次性视角重置 — 1个抽象重构问题 + 3项快速检查（范围偏移、副作用、更优方案），10行以内。工作中随时可用 |
+
 ### 会话管理
 
 | 技能 | 功能 |
@@ -61,7 +75,7 @@
 | 技能 | 功能 |
 |------|------|
 | [project-check](../project-check/) | 从 4 个维度扫描现有项目：基础设施、安全、质量、测试框架。按严重度排序差距 |
-| [collab-audit](../collab-audit/) | 13 节 AI 协作审计 — 分析实际工作模式（非问卷），生成行为画像、盲点和成长方向 |
+| [collab-audit](../collab-audit/) | 14 节 AI 协作审计 — 分析实际工作模式（非问卷），生成行为画像、盲点和成长方向 |
 
 ---
 
@@ -75,12 +89,14 @@
 ┌──────────────────── 日常循环 ───────────────────────┐
 │  /session-start                                       │
 │       ↓                                               │
-│  /scope → /freeze → /goal-lock → 工作 → /pre-push    │
+│  /scope → /freeze → /goal-lock → 工作                 │
+│       → /stepback (随时) → /code-autopsy → /pre-push   │
 │       ↓                                               │
 │  /session-checkpoint                                  │
 └───────────────────────────────────────────────────────┘
          ↓
 ┌──────────────────── 按需 ──────────────────────────┐
+│  /stepback         （视角重置 — 随时）                  │
 │  /project-check    （健康审计）                        │
 │  /collab-audit     （行为诊断）                        │
 └──────────────────────────────────────────────────────┘
@@ -94,8 +110,8 @@
 
 ```bash
 # 安装所有技能
-git clone https://github.com/AlexZio00/claude-code-skills.git
-cd claude-code-skills
+git clone https://github.com/AlexZio00/sovereign-skills.git
+cd sovereign-skills
 for d in */; do [ -f "$d/SKILL.md" ] && cp -r "$d" ~/.claude/skills/; done
 
 # 或安装单个技能
@@ -108,7 +124,7 @@ cp -r goal-lock ~/.claude/skills/
 
 ```bash
 # 在 Claude Code 中添加 sovereign-plugins 市场
-# 设置 → 插件 → 添加市场 → https://github.com/AlexZio00/claude-code-skills.git
+# 设置 → 插件 → 添加市场 → https://github.com/AlexZio00/sovereign-skills.git
 ```
 
 每个技能也包含独立的 `.claude-plugin/plugin.json` 元数据。

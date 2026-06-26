@@ -84,6 +84,10 @@ description: |
 
 **Risk Flags**
 - [최소 1개]
+
+**Contraindication**
+- [이 접근이 맞지 않는 조건 — 최소 1개]
+- 예: "데이터가 10만 건 이상이면 이 설계는 성능 문제", "팀이 2명 이상이면 API 계약 먼저"
 ```
 
 ### Step 4: 승인 → BRIEF.md 저장

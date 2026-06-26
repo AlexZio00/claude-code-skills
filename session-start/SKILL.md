@@ -109,7 +109,7 @@ user_invocable: true
 
 ### 2.2 모델 차이 분석 리마인드 (반자동 — 결정론 체크)
 
-> 모델별 행동 차등 보상의 분석 트리거. 설계: `docs/plans/2026-06-11-opus-fable-porting-harness-design.md` §4②. 쌓인 model 태그를 주기적으로 패턴→룰로 전환하기 위한 리마인드(완전 자동 cron은 로컬 불가).
+> 모델별 행동 차등 보상의 분석 트리거. 쌓인 model 태그를 주기적으로 패턴→룰로 전환하기 위한 리마인드.
 
 결정론 집계 ( — 셈은 기계):
 - `tasks/lessons.md`에서 `model:` 필드 보유 lesson 수 카운트 + `~/.claude/.harness/interventions/*.jsonl`에서 `"model"` 필드 보유 항목 수
@@ -125,9 +125,20 @@ user_invocable: true
 
 ---
 
+### 2.3 Context Rot Prevention
+
+When loading handoff + lessons, apply a **sliding window** to prevent stale context from crowding out recent work:
+- **Recent 5 sessions**: load full handoff content
+- **Older entries**: 1-line summary only (title + date + outcome)
+- **context-log.md**: entries older than 90 days with `ref:0` → skip (no one referenced them)
+
+This prevents the "memory keeps growing but quality keeps dropping" pattern where old context dilutes recent priorities.
+
+---
+
 ## Phase 3: 글로벌 상태 확인
 
-`C:\Users\지오\.claude\STATE.md` 읽기.
+`~/.claude/STATE.md` 읽기 (있으면).
 
 확인:
 - 미결 의사결정 중 이 세션에서 해결 가능한 것?

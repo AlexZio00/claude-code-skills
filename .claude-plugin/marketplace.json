@@ -70,11 +70,25 @@
       "tags": ["audit", "health-check", "infrastructure", "security", "quality", "diagnostic"]
     },
     {
+      "name": "code-autopsy",
+      "description": "12Q quantified code review — 4-axis scoring (Security/Stability/Robustness/Operability), severity anchors, deployment verdict, factuality gate. Works as standalone prompt in any LLM",
+      "source": "./code-autopsy",
+      "category": "development",
+      "tags": ["code-review", "12q", "severity", "scoring", "deployment-verdict", "security", "testing", "observability"]
+    },
+    {
       "name": "collab-audit",
       "description": "13-section AI collaboration audit — analyzes actual work patterns to generate behavioral profile, blind spots, and growth direction",
       "source": "./collab-audit",
       "category": "productivity",
       "tags": ["collaboration", "audit", "behavioral", "patterns", "growth", "diagnostic"]
+    },
+    {
+      "name": "stepback",
+      "description": "One-shot perspective reset — 1 reframing question + 3 quick checks (scope drift, side effects, better approach) in under 10 lines. Use anytime during work",
+      "source": "./stepback",
+      "category": "productivity",
+      "tags": ["perspective", "zoom-out", "scope-check", "direction", "meta", "one-shot"]
     }
   ]
 }

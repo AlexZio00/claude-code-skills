@@ -410,6 +410,34 @@ Generate based on what was decided in Q6 (AI/LLM) and Q3 (data layer):
 Only include sections relevant to the project's decided stack.
 Leave all values empty — this file is a template, never a config.
 
+**Extended sections (conditional on Q3/Q6 answers):**
+```bash
+# === OAuth / Auth (if auth layer selected in Q3) ===
+# OAUTH_CLIENT_ID=
+# OAUTH_CLIENT_SECRET=
+# JWT_SECRET=
+
+# === External Services (if external APIs in Q6) ===
+# STRIPE_API_KEY=
+# SENDGRID_API_KEY=
+# AWS_ACCESS_KEY_ID=
+# AWS_SECRET_ACCESS_KEY=
+# AWS_REGION=
+
+# === Monitoring (if production deployment planned) ===
+# SENTRY_DSN=
+# DATADOG_API_KEY=
+```
+
+**Security Baseline (always include):**
+```bash
+# === Security Notes ===
+# 1. Copy this file to .env and fill real values
+# 2. NEVER commit .env — only .env.example
+# 3. Rotate keys if accidentally exposed
+# 4. Use least-privilege scopes for all API keys
+```
+
 **Swift projects:** same structure — include only sections relevant to your app's API dependencies:
 
 ```bash

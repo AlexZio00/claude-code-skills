@@ -1,10 +1,10 @@
 [English](../README.md) | [한국어](README.ko.md) | [日本語](README.ja.md) | [中文](README.zh.md) | 🌐 **Español**
 
-# claude-code-skills v6.0
+# sovereign-skills v6.2
 
-10 habilidades para el ciclo de vida completo de proyectos con Claude Code — desde la configuración hasta el flujo de trabajo diario y la gestión de sesiones. Cada habilidad funciona de forma independiente; la secuencia completa cubre todas las etapas.
+12 habilidades para el ciclo de vida completo de proyectos con Claude Code — desde la configuración hasta el flujo de trabajo diario, revisión de código y gestión de sesiones. Cada habilidad funciona de forma independiente; la secuencia completa cubre todas las etapas.
 
-> **Cambios en v6.0:** Consolidado de 13 a 10 habilidades. `harness-init` + `team-init` → `setup`. `brief` + `adr` → `scope`. `retro` absorbido en `session-checkpoint`. `token-audit` eliminado (usar `npx ccusage` CLI). Nuevo: `goal-lock` — motor de disciplina de agentes.
+> **Cambios en v6.2:** Nuevo: `code-autopsy` — revisión de código cuantificada 12Q. Puntuación de 4 ejes (Security/Stability/Robustness/Operability), anclajes de severidad, veredicto de despliegue (SHIP/FIX/RISKY/BLOCK), meta-detección CapCode/CEF. Funciona como prompt independiente en cualquier LLM. Nuevo: `stepback` — reinicio de perspectiva. Las 10 habilidades existentes actualizadas.
 
 ---
 
@@ -19,6 +19,8 @@ Diariamente:
   /scope              antes de cada funcionalidad (definir IN/OUT/criterios de salida)
   /freeze             antes de implementar (declarar zona editable)
   /goal-lock          bloquear objetivo, forzar ciclo PLAN→DO→VERIFY
+  /stepback           en cualquier momento — verificar dirección, 10 líneas
+  /code-autopsy       revisión de código 12Q + puntuación + veredicto
   /pre-push           antes de cada push (escaneo de secretos + revisión AI)
   /session-checkpoint al final de cada sesión
 ```
@@ -26,7 +28,7 @@ Diariamente:
 **Proyecto existente (5 min):**
 ```
 /project-check      →  Puntuación en 4 dimensiones + lista de brechas por severidad
-/collab-audit       →  Diagnóstico de colaboración AI en 13 secciones
+/collab-audit       →  Diagnóstico de colaboración AI en 14 secciones
 ```
 
 ---
@@ -49,6 +51,18 @@ Diariamente:
 | [goal-lock](../goal-lock/) | **Nuevo.** Motor de disciplina de agentes — bloquea el objetivo, fuerza el ciclo PLAN→DO→VERIFY→FINALIZE→OUTPUT, detecta 11 patrones de enmascaramiento de éxito |
 | [pre-push](../pre-push/) | Pipeline pre-push obligatorio — escaneo de secretos (12 patrones), build/test, lint, revisión de código AI en paralelo. Bloquea push ante hallazgos Critical/High |
 
+### Revisión de código
+
+| Habilidad | Función |
+|-----------|---------|
+| [code-autopsy](../code-autopsy/) | Revisión de código cuantificada 12Q — puntuación de 4 ejes (Security/Stability/Robustness/Operability), anclajes de severidad, veredicto de despliegue (SHIP/FIX/RISKY/BLOCK), gate de factualidad, detección de gaming CapCode, detección de errores fabricados CEF. Funciona como prompt independiente en cualquier LLM |
+
+### Cambio de perspectiva
+
+| Habilidad | Función |
+|-----------|---------|
+| [stepback](../stepback/) | **Nuevo.** Reinicio de perspectiva en un paso — 1 pregunta de reencuadre abstracto + 3 verificaciones rápidas (desvío de alcance, efectos secundarios, mejor enfoque) en menos de 10 líneas. Usar en cualquier momento durante el trabajo |
+
 ### Gestión de sesiones
 
 | Habilidad | Función |
@@ -61,7 +75,7 @@ Diariamente:
 | Habilidad | Función |
 |-----------|---------|
 | [project-check](../project-check/) | Escanea el proyecto existente en 4 dimensiones: Infraestructura, Seguridad, Calidad, Harness. Brechas ordenadas por severidad |
-| [collab-audit](../collab-audit/) | Auditoría de colaboración AI en 13 secciones — analiza patrones de trabajo reales (no encuestas) para generar perfil conductual, puntos ciegos y dirección de crecimiento |
+| [collab-audit](../collab-audit/) | Auditoría de colaboración AI en 14 secciones — analiza patrones de trabajo reales (no encuestas) para generar perfil conductual, puntos ciegos y dirección de crecimiento |
 
 ---
 
@@ -75,12 +89,14 @@ Diariamente:
 ┌─────────────────── Ciclo diario ───────────────────┐
 │  /session-start                                      │
 │       ↓                                              │
-│  /scope → /freeze → /goal-lock → trabajo → /pre-push│
+│  /scope → /freeze → /goal-lock → trabajo              │
+│       → /stepback (anytime) → /code-autopsy → /pre-push│
 │       ↓                                              │
 │  /session-checkpoint                                 │
 └──────────────────────────────────────────────────────┘
          ↓
 ┌─────────────────── Bajo demanda ───────────────────┐
+│  /stepback         (reinicio de perspectiva)         │
 │  /project-check    (auditoría de salud)              │
 │  /collab-audit     (diagnóstico conductual)          │
 └─────────────────────────────────────────────────────┘
@@ -94,8 +110,8 @@ Diariamente:
 
 ```bash
 # Instalar todas las habilidades
-git clone https://github.com/AlexZio00/claude-code-skills.git
-cd claude-code-skills
+git clone https://github.com/AlexZio00/sovereign-skills.git
+cd sovereign-skills
 for d in */; do [ -f "$d/SKILL.md" ] && cp -r "$d" ~/.claude/skills/; done
 
 # O instalar una habilidad individual
@@ -108,7 +124,7 @@ Este repositorio es un marketplace de Claude Code. Regístrelo una vez para expl
 
 ```bash
 # Agregar marketplace sovereign-plugins en Claude Code
-# Configuración → Plugins → Agregar Marketplace → https://github.com/AlexZio00/claude-code-skills.git
+# Configuración → Plugins → Agregar Marketplace → https://github.com/AlexZio00/sovereign-skills.git
 ```
 
 Cada habilidad también incluye metadatos `.claude-plugin/plugin.json` independientes.

@@ -340,7 +340,7 @@ memory: structured
 
 ## Phase 1.5: Failure-Grounded Rule Discovery (optional — opt-in)
 
-> 차용: hyperbrowserai/examples `harness-skill` (실패에서 규칙을 캐낸다) +  파라메트릭 노후(live-doc drift).
+> 실패에서 규칙을 캐낸다 — 실제 태스크 실행 중 실패·드리프트를 관찰해 규칙을 도출한다.
 > 프리셋(Phase 1)은 **일반 규칙**. 이 단계는 **이 프로젝트의 실제 실패**에서 프로젝트-특정 규칙을 캐낸다.
 > **opt-in**: 유저가 "실측 기반"/"failure-grounded"/"실제 돌려보고" 요청 시, 또는 기존 코드베이스가 있을 때 제안. 신규 빈 프로젝트면 skip(실패 표면 없음).
 
@@ -357,7 +357,7 @@ memory: structured
 ### 1.5-3. Derive rules from real failures
 프리셋 규칙과 **별개로**, 1.5-1/1.5-2에서 나온 **실제 실패에 추적되는** Tier-2/4 규칙만 생성한다.
 - **일반 규칙 금지** — 모든 도출 규칙은 실제 실패 또는 live-doc 발견에 추적 가능해야 한다 (inspect→act→verify 노출 = EGS).
-- Phase 3 규칙 생성 시 프리셋과 병합. 출처 태그: `<!-- from: 실패 {명령} / live-doc {dep} -->`.
+- Phase 3 규칙 생성 시 프리셋과 병합. origin 태그: `<!-- from: failure {cmd} / live-doc {dep} -->`.
 
 > 이 단계가 setup을 인터뷰-only에서 **실측 실행 기반**으로 확장한다. 프리셋=출발점, 실패-grounding=프로젝트 진실.
 
@@ -627,7 +627,13 @@ For each response:
 After haiku pass: re-run the most critical scenario with model: "sonnet" (spot-check).
 
 **Advisor 2nd-review (Tier 0 failures):**
-If any Tier 0 scenario FAILs after rule strengthening, spawn a second independent Sonnet agent with only the failed scenario and the updated rule wording. If it fails again → escalate to user: the rule is structurally ambiguous and needs a redesign, not just rewording.
+If any Tier 0 scenario FAILs after rule strengthening, spawn a second independent Sonnet agent with only the failed scenario and the updated rule wording. If it fails again → escalate to user with **Redesign Protocol**:
+
+**Redesign Protocol (Tier 0 2x fail):**
+1. **Root Cause** — why rewording doesn't fix it (structural ambiguity / rule conflict / scope too broad)
+2. **3 Options** — (a) split into 2 narrower rules (b) reduce scope and rewrite (c) remove rule + propose alternative
+3. **Wait for user choice** — no auto-proceed. User picks one of 3, then regenerate
+4. After regeneration, **re-run violation testing** (no skip)
 
 Save passing scenarios to `docs/harness-tests.md` for regression use.
 

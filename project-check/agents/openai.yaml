@@ -1,0 +1,3 @@
+name: project-check
+description: "Audit project harness maturity across 6 axes and 58-item checklist with static and behavioral analysis."
+instructions: "../SKILL.md"

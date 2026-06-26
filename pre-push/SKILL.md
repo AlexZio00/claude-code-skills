@@ -15,8 +15,7 @@ user_invocable: true
 ---
 
 <!--
-  v3.3.0 (2026-06-12) — Step 6 대형 diff 결정론 번들링 (출처: alibaba/open-code-review 차용 —
-                         커버리지를 에이전트 성실성이 아닌 구조로 보장. 번들 합집합 = staged 전체 검증)
+  v3.3.0 (2026-06-12) — Step 6 대형 diff 결정론 번들링 (커버리지를 에이전트 성실성이 아닌 구조로 보장)
   v3.2.0 (2026-05-06) — /XVII 상속 추가: Error Recovery (Step 7) + State Sync (Step 6 병렬 결과 병합)
   v3.1.0 (2026-04-11) — defense structure: Dominant variable, Discard if,
                          Rationalization Table (6), Invariants (4), Scope Boundary
@@ -101,6 +100,11 @@ Scan `$STAGED_FILES` and list findings in the final report:
 - **Package manifests** (`package.json`, `yarn.lock`, `pnpm-lock.yaml`, `requirements.txt`, `Gemfile`, `go.mod`, `Cargo.toml`): list all **added** dependencies. Flag misspelled or unfamiliar names as potential typosquats.
 - **Infrastructure files** (`Dockerfile`, `docker-compose*.yml`, `*.tf`, `*.yaml`/`*.yml` in `k8s/` or `infra/`, `nginx.conf`): flag any ENV, ARG, or environment sections for human review.
 - **Python CVE scan** (`pip-audit`): run when `requirements.txt` or `pyproject.toml` changed and `pip-audit` is installed. WARN only — never blocks.
+- **3-IOC Supply Chain Check**: for newly added dependencies, check 3 indicators of compromise:
+  1. **External install links** — does the package README or setup script fetch from non-registry URLs?
+  2. **Obfuscated exfiltration** — base64/hex-encoded strings in post-install scripts?
+  3. **Capability mismatch** — does a "utility" package request network/filesystem access beyond its stated purpose?
+  Flag any match as `⚠️ SUPPLY_CHAIN_IOC` in the report.
 
 ```bash
 CHANGED_REQS=$(echo "$STAGED_FILES" | grep -E "(requirements.*\.txt|pyproject\.toml|setup\.py)$")
@@ -213,7 +217,7 @@ Do NOT read entire files unless absolutely necessary.
 
 > **Spawn all applicable agents in a SINGLE response turn** using concurrent subagent calls — never sequentially. Parallel execution cuts total wall time by the duration of the slowest agent.
 
-**Large diff — 결정론 번들링** (`$DIFF_LINES` > 500 OR 파일 > 10개) (출처: alibaba/open-code-review 차용, 2026-06-12):
+**Large diff — 결정론 번들링** (`$DIFF_LINES` > 500 OR 파일 > 10개):
 
 대형 changeset에서 에이전트가 "알아서 골라 읽는" 방식은 커버리지 누락을 낳는다 — 커버리지는 프롬프트 성실성이 아니라 **구조로 보장**한다:
 
@@ -246,7 +250,7 @@ Trigger `database-reviewer` (sonnet): `prisma/**`, `**/migrations/**`, `**/db*`,
 
 Trigger `refactor-cleaner` (sonnet): 10+ files changed, or user explicitly requested refactoring
 
-**Agent prompt template** (intent-passing — `no-mistakes` 차용: 의도적 결정 vs 실수 구분으로 오탐↓):
+**Agent prompt template** (intent-passing — 의도적 결정 vs 실수 구분으로 오탐↓):
 
 ```
 Review the following staged diff. Focus on changed lines.

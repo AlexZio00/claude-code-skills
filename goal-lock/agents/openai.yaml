@@ -1,0 +1,3 @@
+name: goal-lock
+description: "Agent Discipline Engine — enforce PLAN→DO→VERIFY→FINALIZE→OUTPUT loop and detect success deception."
+instructions: "../SKILL.md"

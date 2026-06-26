@@ -7,7 +7,7 @@ triggers:
   - "협업 분석"
   - "AI 협업 진단해줘"
 name: collab-audit
-description: "This skill should be used when the user types /collab-audit or requests AI collaboration diagnosis. Analyzes conversation history, artifacts, and work patterns to generate a 13-section AI Collaboration Audit. Behavioral analysis and feedback are bundled by design — separating them causes users to skip one, defeating the purpose. Saves to ~/.claude/collab-audits/YYYY-MM-DD.md. Compare mode: /collab-audit compare (diffs latest 2 audits). Triggers: '/collab-audit', '/collab-audit compare', 'AI 협업 진단해줘', '협업 진단', '행동 패턴 분석', '나 어떤 사람이야', 'AI collaboration audit', 'work pattern analysis', 'compare audits'. Requires minimum 2 sessions or 100+ messages. Do NOT use self-report surveys — observation-only."
+description: "This skill should be used when the user types /collab-audit or requests AI collaboration diagnosis. Analyzes conversation history, artifacts, and work patterns to generate a 14-section AI Collaboration Audit. Behavioral analysis and feedback are bundled by design — separating them causes users to skip one, defeating the purpose. Saves to ~/.claude/collab-audits/YYYY-MM-DD.md. Compare mode: /collab-audit compare (diffs latest 2 audits). Triggers: '/collab-audit', '/collab-audit compare', 'AI 협업 진단해줘', '협업 진단', '행동 패턴 분석', '나 어떤 사람이야', 'AI collaboration audit', 'work pattern analysis', 'compare audits'. Requires minimum 2 sessions or 100+ messages. Do NOT use self-report surveys — observation-only."
 user_invocable: true
 ---
 
@@ -45,7 +45,7 @@ user_invocable: true
 ## 모드 판별 (가장 먼저 실행)
 
 - 입력이 `/collab-audit compare` 또는 "비교" 포함 → **Compare 모드** (아래 별도 섹션)
-- 그 외 → **Audit 모드** (13섹션 분석)
+- 그 외 → **Audit 모드** (14섹션 분석)
 
 ---
 
@@ -98,7 +98,7 @@ user_invocable: true
 모든 프레임워크 레이블(MBTI, DiSC 등)에 반드시 행동 증거를 연결한다.
 증거 없이 레이블만 출력하는 것은 분석 실패다.
 
-### Step 4: 13섹션 순서대로 출력
+### Step 4: 14섹션 순서대로 출력
 섹션 순서를 변경하거나 임의로 생략하지 않는다.
 데이터가 없는 섹션은 "관찰 불가" 표기 후 다음 섹션으로 진행한다.
 
@@ -107,7 +107,7 @@ user_invocable: true
    ```
    ---
    profile_version: 1.0
-   sections: 13
+   sections: 14
    date: YYYY-MM-DD
    language: [ko|en]
    ---
@@ -128,7 +128,7 @@ user_invocable: true
 
 ---
 
-## 출력 구조 (13섹션, 순서 고정)
+## 출력 구조 (14섹션, 순서 고정)
 
 ### 1. 아티팩트 구조 분석
 만든 것(코드, 문서, 시스템)에서 가치관을 역추론.
@@ -172,7 +172,7 @@ user_invocable: true
 막힘과 실패를 어떻게 구분하는가? 실패를 시스템에 기록하는가?
 
 **협업 안티패턴 플래그 (관찰 시에만 — 없으면 "관찰 안 됨"):**
-<!-- 차용: vibe-sunsang (fivetaku) antipattern 감지, 2026-06-11. 잘한 것만 짚던 진단에 "반복 비효율" 명시 플래그 추가. -->
+<!-- Anti-pattern flags for repeated inefficiencies -->
 반복(2회+) 관찰되는 비효율 습관만 플래그한다. 1회성 제외. 사각지대(섹션 11)와 달리 추론이 아니라 **행동 빈도 카운트**가 근거 — N회 관찰만, 추측 금지.
 - **회복 없는 반복 실패**: 동일 프롬프트 3회+ 재시도하며 전략 전환 없음 (위 "동일 프롬프트 반복형"이 만성화된 경우)
 - **검증 없는 위임 반복**: L1 복붙(섹션 4)이 되돌리기 어려운 작업에서 반복
@@ -205,7 +205,7 @@ Claude 사용 데이터 없으면 → "해당 없음"으로 표기하고 다음 
 - L2: MEMORY.md + 세션 핸드오프 운용
 - L3: Compact Instructions 설정 + 훅 활용
 - L4: 세션 간 컨텍스트 손실 없음, AI를 장기 파트너로 운용
-- L5: `tasks/lessons.md` 운용 — AI 행동 교정 루프 존재. 반복 실수를 룰로 전환하는 메타 레이어 구축. Boris Cherny의 개발자 워크플로우 방법론에서 파생 (출처: *Programming TypeScript* 저자, Meta Staff Engineer)
+- L5: `tasks/lessons.md` 운용 — AI 행동 교정 루프 존재. 반복 실수를 룰로 전환하는 메타 레이어 구축
 
 컨텍스트 날아간 후 복구 패턴도 기술.
 
@@ -268,8 +268,38 @@ O/C/E/A/N 각각 High/Medium/Low. 행동 근거 1개씩.
 - 시간 범위: **트리거 조건 우선** ("X가 발생하면") — 트리거가 불명확할 때만 기간 조건(다음 세션 / 이번 주 / 이번 달) 사용
 - "해보는 게 좋다" 같은 권유형 금지 — "한다" 형식으로
 
-### 12. 한 줄
-이 사람을 20자 이내로 요약하는 문장 하나.
+### 12. Thinking Level Trajectory
+
+Track how the user's thinking level changes across sessions/time periods.
+
+**5-Level Model:**
+| Level | Name | Characteristics |
+|:-----:|------|----------------|
+| L1 | Information Requester | Simple facts, summaries, explanations |
+| L2 | Problem Solver | Solutions, comparisons, recommendations for specific problems |
+| L3 | Structure Analyst | Variables, causes, mechanisms, system structures |
+| L4 | Hypothesis Verifier | Presents own ideas + demands counterarguments, verification, alternatives |
+| L5 | Thought Designer | Co-designs frameworks, decision structures, long-term strategies |
+
+**Analysis method:**
+- Extract 2-3 representative questions/requests from early vs recent sessions, assign Level
+- Not a single fixed Level — explain **domain differences** (e.g., "coding at L4, research at L2")
+- Direction over time: `↑ rising / → stable / ↓ declining`
+- **AI attribution correction**: did the Level evidence come from the user's own questions/instructions, or from copying AI-generated structure? Repeating AI-provided frameworks is closer to L2 than L3.
+
+**Output:**
+```
+Early: L[N] — [evidence quote]
+Current: L[M] — [evidence quote]
+Change: [↑/→/↓] [one-line interpretation]
+Domain variance: [domainA: LN, domainB: LM]
+AI attribution: [if applicable, 1 line]
+```
+
+Insufficient data → `Not observable — insufficient timeline data`.
+
+### 13. One Line
+Summarize this person in 20 characters or less.
 
 ---
 
@@ -286,7 +316,7 @@ O/C/E/A/N 각각 High/Medium/Low. 행동 근거 1개씩.
 ## Truthful Reporting
 
 이 스킬은 audit 리포트 저장 후 보고 시:
-1. **no mock deception**: 13섹션 중 관찰 근거 부족으로 추론만 한 섹션은 `⚠️ 근거 부족` 명시. "통찰"로 위장 금지.
+1. **no mock deception**: 14섹션 중 관찰 근거 부족으로 추론만 한 섹션은 `⚠️ 근거 부족` 명시. "통찰"로 위장 금지.
 2. **no test façade**: 세션 수·메시지 수 최소 기준(2 sessions / 100 msgs) 미달 시 축소 리포트 생성. 임의 채워넣기 금지.
 3. **no silent brokenness**: 저장 실패 시 `BROKEN` 상태 명시. 부분 저장 시 `PARTIAL` + 누락 섹션 나열.
 
@@ -295,7 +325,7 @@ O/C/E/A/N 각각 High/Medium/Low. 행동 근거 1개씩.
 ## Output
 
 **Audit 모드:**
-- 대화창: 13섹션 구조화 리포트 순서대로 출력. 마지막 섹션은 반드시 "12. 한 줄".
+- 대화창: 14섹션 구조화 리포트 순서대로 출력. 마지막 섹션은 반드시 "13. One Line".
 - 파일 저장: `~/.claude/collab-audits/YYYY-MM-DD.md` (자동 저장, 덮어쓰기 금지 — 같은 날 재실행 시 `-2.md` suffix)
 - 저장 완료 후 대화창에 경로 표시: `저장됨: ~/.claude/collab-audits/YYYY-MM-DD.md`
 
@@ -303,7 +333,7 @@ O/C/E/A/N 각각 High/Medium/Low. 행동 근거 1개씩.
 - `~/.claude/collab-audits/` 에서 최근 2개 파일 자동 선택
   - 날짜 지정 가능: `/collab-audit compare 2026-01-01 2026-04-09`
   - 파일 1개뿐이면 → "비교할 이전 감사 결과 없음. 현재 감사 결과를 저장하고 다음에 비교하세요."
-  - 버전/섹션 수 불일치 시 → 공통 섹션만 비교, 상단에 표시: `⚠ 버전 불일치 (v1.0 13섹션 ↔ 구버전 N섹션) — 공통 섹션만 비교`
+  - 버전/섹션 수 불일치 시 → 공통 섹션만 비교, 상단에 표시: `⚠ 버전 불일치 (v1.0 14섹션 ↔ 구버전 N섹션) — 공통 섹션만 비교`
 - 비교 출력 형식:
 
 ```

@@ -143,6 +143,7 @@ Any of 7 fields (Quick: 3) **missing or contradictory → don't guess, STOP.**
 | Production behavior change | Modify production logic to match tests |
 | Goal-lock declaration ignored | Declare "proceeding with goal-lock" then skip the input sheet |
 | Structural fix reported as upgrade | Report boilerplate additions as "substantive improvements" |
+| Ralph Wiggum (early completion) | Skip VERIFY or run it partially, then jump to OUTPUT. Emit completion signal from an incomplete state |
 
 **Language-specific patterns**:
 - Python: `@pytest.mark.skip`, `@pytest.mark.xfail`, `mock.return_value` abuse
@@ -197,6 +198,8 @@ Risk detected → return to PLAN with avoidance strategy.
 | General | `git diff --stat` (verify change scope) |
 
 Items not verified: `NOT RUN: [reason]`. Never "it should be fine."
+
+**GroundEval**: verify that verification tool calls **actually executed**. If the OUTPUT claims "tests passed" but no `pytest`/`npm test` Bash call exists in the tool history, the claim is ungrounded. Every verification claim in OUTPUT must trace back to an actual tool invocation.
 
 #### FINALIZE
 - After goal achieved, **no additional refactoring.**

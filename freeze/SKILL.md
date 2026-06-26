@@ -5,7 +5,7 @@ name: freeze
 description: "Scope lock for current task. Declares editable zone — everything outside is frozen (read-only). Call before starting implementation to prevent scope creep."
 tags: [meta, safety]
 version: "1.0.0"
-source: "garrytan/gstack freeze pattern — adapted (2026-05-08)"
+source: "freeze pattern"
 triggers:
   - "/freeze"
   - "freeze this"
@@ -19,7 +19,7 @@ user_invocable: true
 
 # /freeze — Scope Lock
 
-> 출처: garrytan/gstack freeze 패턴 차용 (2026-05-08).  상속.
+> Declare editable zone — everything outside is frozen.
 
 ## Dominant Variable
 
@@ -156,6 +156,24 @@ FROZEN SCOPE 블록 출력 후 즉시 종료.
 
 ---
 
+## Thaw Protocol
+
+When a frozen file needs modification mid-work:
+
+**Trigger**: "unfreeze [file]", "thaw", "expand scope"
+
+**Steps:**
+1. **State reason** — why the frozen file must be touched (no reason → refuse)
+2. **Blast radius check** — what else is affected if this file changes
+3. **Re-emit FROZEN SCOPE block** — add thawed file to editable, keep rest frozen
+4. **Invalidate previous block** — "Previous freeze replaced" 1 line
+
+**Limits:**
+- 3+ thaws → `⚠️ Freeze is being repeatedly lifted — consider re-running /scope to redefine boundaries`
+- Full thaw ("unfreeze everything") → freeze skill terminates (Discard)
+
+---
+
 ## Rationalization Table
 
 | 합리화 | 반박 |
@@ -171,28 +189,27 @@ FROZEN SCOPE 블록 출력 후 즉시 종료.
 ## Example
 
 ```
-유저: "/freeze dashboard_dash/pages/financial_report_tab.py"
+User: "/freeze src/components/UserProfile.tsx"
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🔒 FROZEN SCOPE — financial_report_tab.py 렌더링 수정
+🔒 FROZEN SCOPE — UserProfile component refactor
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 ✅ EDITABLE
-  - dashboard_dash/pages/financial_report_tab.py
+  - src/components/UserProfile.tsx
 
-❌ FROZEN (수정 금지)
-  - 위 파일 외 전체
+❌ FROZEN (no modifications)
+  - everything outside the above
 
-⚠️  READ-ONLY (참조만)
-  - skills/financial_report.py (render() 구현 참조용)
+⚠️  READ-ONLY (reference only)
+  - src/hooks/useAuth.ts (auth logic reference)
 
-규칙:
-- financial_report_tab.py 외 파일은 Edit/Write 금지
-- 수정 필요 발견 시 즉시 중단 → 유저 보고
+Rules:
+- No Edit/Write outside UserProfile.tsx
+- If modification needed elsewhere → stop and report
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
-## gstack 원형과의 차이
+## Design Note
 
-gstack freeze는 세션 전역 파일 목록 기반. 이 버전은 태스크 단위 선언 기반 (세션 상태 저장 없음).
-이유: Claude Code는 세션 간 상태 지속 불가 → 선언 블록 자체가 컨텍스트 내 state 역할.
+This version uses task-level declaration (not session-global file lists) because Claude Code cannot persist state across sessions — the declaration block itself serves as in-context state.

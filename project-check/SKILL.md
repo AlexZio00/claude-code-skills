@@ -191,6 +191,28 @@ Always end with next steps:
   → /project-check (재점검 → score 개선 확인)
 ```
 
+### Step 6.5: Score Delta Tracking
+
+If a previous check result exists (`.project-check-history.json` in project root), compare:
+
+```
+── Score Delta ──
+Previous: [N]/10 (YYYY-MM-DD) → Current: [M]/10
+Change: [+X / -X / no change]
+
+Improved: [items that went ✗→✓]
+New gaps: [items not flagged before]
+Unresolved: [items still failing]
+```
+
+If no previous result exists, suggest saving current result:
+```json
+{"date":"YYYY-MM-DD","score":N,"gaps":{"critical":N,"fail":N,"warn":N}}
+```
+`"Next /project-check will show score delta."` — 1 line.
+
+**No auto-save** — suggest only. User approves before append.
+
 ---
 
 ## Rationalization Table
