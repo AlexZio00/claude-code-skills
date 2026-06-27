@@ -28,6 +28,7 @@ Diariamente:
 **Proyecto existente (5 min):**
 ```
 /project-check      →  Puntuación en 4 dimensiones + lista de brechas por severidad
+/code-autopsy       →  Revisión de código 12Q (funciona como prompt independiente en cualquier LLM)
 /collab-audit       →  Diagnóstico de colaboración AI en 14 secciones
 ```
 
@@ -48,7 +49,7 @@ Diariamente:
 |-----------|---------|
 | [scope](../scope/) | Definir IN/OUT/criterios de salida antes de implementar. Modo Quick (3 preguntas) o modo Full (especificación por capas) |
 | [freeze](../freeze/) | Declarar la zona editable — todo lo demás queda congelado. Previene la expansión del alcance durante la implementación |
-| [goal-lock](../goal-lock/) | **Nuevo.** Motor de disciplina de agentes — bloquea el objetivo, fuerza el ciclo PLAN→DO→VERIFY→FINALIZE→OUTPUT, detecta 11 patrones de enmascaramiento de éxito |
+| [goal-lock](../goal-lock/) | Motor de disciplina de agentes — bloquea el objetivo, fuerza el ciclo PLAN→DO→VERIFY→FINALIZE→OUTPUT, detecta 11 patrones de enmascaramiento de éxito |
 | [pre-push](../pre-push/) | Pipeline pre-push obligatorio — escaneo de secretos (12 patrones), build/test, lint, revisión de código AI en paralelo. Bloquea push ante hallazgos Critical/High |
 
 ### Revisión de código
@@ -131,11 +132,104 @@ Cada habilidad también incluye metadatos `.claude-plugin/plugin.json` independi
 
 Escriba el comando de activación (ej: `/goal-lock`) en Claude Code para ejecutar la habilidad.
 
+### Opción C: Codex / Cursor (npx)
+
+Cada habilidad incluye `agents/openai.yaml`:
+
+```bash
+# Instalar habilidad para Codex
+npx skills add AlexZio00/sovereign-skills --skill goal-lock --agent codex -g -y
+
+# Instalar habilidad para Cursor
+npx skills add AlexZio00/sovereign-skills --skill goal-lock --agent cursor -g -y
+
+# Instalar para Claude Code (alternativa a la opción A)
+npx skills add AlexZio00/sovereign-skills --skill goal-lock --agent claude-code -g -y
+```
+
+El contenido de SKILL.md es universal — funciona con cualquier LLM que lea instrucciones markdown.
+
 ### Requisitos
 
 - [Claude Code](https://claude.ai/code) CLI, app de escritorio o app web
 - Directorio de habilidades: `~/.claude/skills/` (creado automáticamente por Claude Code)
 - `pre-push` requiere Perl (`scan_secrets.pl` incluido)
+
+---
+
+## Qué hay nuevo en v6.2
+
+### Agregado
+- **stepback** — Reinicio de perspectiva en un paso. Genera 1 pregunta de reencuadre abstracto (patrón step-back de DeepMind) + 3 comprobaciones rápidas (desvío de alcance, efectos secundarios, mejor enfoque) en menos de 10 líneas. Solo lectura, sin agentes, sin código. Use en cualquier momento durante el trabajo para verificar que está resolviendo el problema correcto al nivel correcto. Fuente: team-attention/hoyeon.
+
+### Actualizado
+- **code-autopsy** — Puertas de metadetección agregadas: métrica de límite CapCode para detectar manipulación de puntuación, detección CEF de errores falsos para evasión de restricciones.
+- **collab-audit** — 13→14 secciones. Nueva Sección 12: Trayectoria del Nivel de Pensamiento (modelo de 5 niveles de Solicitante de Información a Diseñador de Pensamiento + seguimiento de cambio temporal + corrección de atribución de IA).
+- **goal-lock** — Agregado Ralph Wiggum detección de finalización temprana (12º patrón de enmascaramiento) + trazabilidad de verificación en la etapa VERIFY (toda afirmación debe rastrearse hasta una llamada de herramienta real).
+- **session-checkpoint** — Agregado autoverificación de claridad de entrega (2 preguntas de anclaje después de escribir la entrega).
+- **session-start** — Agregado Prevención de Decadencia de Contexto (ventana deslizante para entradas de entrega antiguas).
+- **pre-push** — Agregada Verificación de Cadena de Suministro de 3-IOC para dependencias recién agregadas.
+- **scope** — Campo de Contraindicación agregado (condiciones donde el enfoque elegido NO es adecuado).
+- **freeze** — Protocolo Thaw agregado (flujo de descongelación formal con verificación de radio de explosión, 3 advertencias de descongelación).
+- **project-init** — Plantilla `.env.example` extendida (OAuth, servicios externos, secciones de monitoreo) + notas de línea base de seguridad.
+- **project-check** — Seguimiento de Delta de Puntuación agregado (comparar resultados de escaneo actual vs anterior).
+- **setup** — Protocolo de Rediseño agregado para fallos de prueba de violación de Tier 0 (escalada de 3 opciones).
+
+---
+
+## Qué hay nuevo en v6.1
+
+### Agregado
+- **code-autopsy** — Prompt de revisión de código cuantificado 12Q (Code Autopsy v7.0). 12 preguntas de análisis que abarcan desde el diseño hasta la observabilidad. Puntuación compuesta de 4 ejes (Security × 0.35 + Stability × 0.30 + Robustness × 0.20 + Operability × 0.15). Tabla de anclajes de severidad con fórmula ponderada. Veredicto de despliegue con límite duro CRITICAL. Puerta de Factualidad (autoverificación antes de reportar). Análisis de impacto entre archivos. Modo Rápido y Modo Diff. Respaldado por: Google eng-practices, Johnson et al. 2019, Parnas 1972. Funciona como prompt independiente en cualquier LLM — no es exclusivo de Claude Code.
+
+---
+
+## Qué hay nuevo en v6.0
+
+### Agregado
+- **goal-lock** — Motor de disciplina de agentes con ciclo PLAN→DO→VERIFY→FINALIZE→OUTPUT. Detecta 11 patrones de enmascaramiento de éxito (eliminación de pruebas, envoltura de mock, relajación de umbral, etc.). Modo Rápido (3 campos) para cambios pequeños, Modo Completo (7 campos) para todo lo demás.
+
+### Fusionado
+- `harness-init` + `team-init` → **setup** — Infraestructura y equipo de agentes en un flujo
+- `brief` + `adr` → **scope** — Definición de alcance con capacidad ADR integrada
+- `retro` → **session-checkpoint** — Retrospección es ahora Phase 1.7 Reflexion dentro de session-checkpoint
+
+### Removido
+- `token-audit` — Use `npx ccusage` directamente, o construya una habilidad ccusage a partir del patrón
+- `adr` (independiente) — Absorbido en scope
+- `retro` (independiente) — Absorbido en session-checkpoint
+
+### Actualizado
+- Todas las habilidades: Dominant Variable, Key Assumptions, Error Recovery, Safety Layers agregados
+- Todas las habilidades: Scope Boundary con etiquetas de acción ([READ]/[WRITE]/[BASH]/[AGENT])
+- `session-checkpoint`: Compresión Memento CoT, Reflexión, Registro de Invocación
+- `pre-push`: Agrupamiento determinista de diff grande, Condiciones Discard If
+- `collab-audit`: Indicadores de antipatrón, Key Assumptions
+
+---
+
+## Cobertura de Patrones de Diseño Agénico
+
+Estas 12 habilidades implementan 17 de los 25 patrones de diseño agénico conocidos ([Gulli 2026](https://books.google.com/books/about/Agentic_Design_Patterns.html?id=QqR20QEACAAJ), [Sairahul 2026](https://x.com/sairahul1/status/2069045570556383464)):
+
+| Patrón | Implementado por | Cómo |
+|--------|------------------|------|
+| **Sequential Pipeline** | session-start → scope → goal-lock → pre-push → checkpoint | Cadena de ciclo de vida completo |
+| **Parallel Execution** | pre-push | Agentes paralelos de revisión de código AI |
+| **Loop (Retry)** | goal-lock | VERIFY falla → reingreso a PLAN, con límites |
+| **Review & Critique** | pre-push, code-autopsy | code-reviewer + security-reviewer independientes; revisión estructurada 12Q |
+| **Iterative Refinement** | goal-lock | PLAN→DO→VERIFY→FINALIZE until DONE EVIDENCE pasa |
+| **Coordinator/Router** | setup | Generación de reglas de enrutamiento de agentes |
+| **Plan-and-Execute** | goal-lock, scope | Plan revisable antes de ejecución |
+| **ReAct** | project-check | Investigar → puntuar → recomendar ruta |
+| **Reflexion** | session-checkpoint | Phase 1.7: analizar fallos → lecciones para próxima sesión |
+| **Human-in-the-Loop** | goal-lock, pre-push | STOP RULES, Critical/High bloquea push |
+| **Custom Logic** | pre-push | Escaneo determinista de secretos (Perl) + revisión AI |
+| **Event-Driven** | session-start | Se dispara al abrir sesión, carga estado anterior |
+| **Guardrails/Safety** | goal-lock | 11 patrones de enmascaramiento de éxito detectados |
+| **Memory Management** | session-checkpoint | Archivo handoff + actualizaciones de memoria + extracción de lecciones |
+| **Goal Setting** | goal-lock | Hoja de entrada GOAL + DONE EVIDENCE |
+| **Step-Back Abstraction** | stepback | DeepMind step-back: concreto → principio abstracto |
 
 ---
 
