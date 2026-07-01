@@ -162,57 +162,6 @@ The SKILL.md content is universal — it works with any LLM that reads markdown 
 
 ---
 
-## What's New in v6.2
-
-### Added
-- **stepback** — One-shot perspective reset. Generates 1 abstract reframing question (DeepMind step-back pattern) + 3 quick checks (scope drift, side effects, better approach) in under 10 lines. Read-only, no agents, no code. Use anytime during implementation to check if you're solving the right problem at the right level. Source: team-attention/hoyeon.
-
-### Updated
-- **code-autopsy** — Added Meta-Detection Gates: CapCode ceiling metric for score gaming detection, CEF fabrication detection for constraint-evasive fake errors.
-- **collab-audit** — 13→14 sections. New Section 12: Thinking Level Trajectory (5-Level model from Information Requester to Thought Designer + temporal change tracking + AI attribution correction).
-- **goal-lock** — Added Ralph Wiggum early-completion detection (12th masquerading pattern) + verification traceability in VERIFY stage (every claim must trace to an actual tool call).
-- **session-checkpoint** — Added handoff clarity self-check (2 anchor questions after handoff writing).
-- **session-start** — Added Context Rot Prevention (sliding window for stale handoff entries).
-- **pre-push** — Added 3-IOC Supply Chain Check for newly added dependencies.
-- **scope** — Added Contraindication field (conditions where the chosen approach is NOT suitable).
-- **freeze** — Added Thaw Protocol (formal unfreeze workflow with blast radius check, 3-thaw warning).
-- **project-init** — Extended `.env.example` template (OAuth, external services, monitoring sections) + Security Baseline notes.
-- **project-check** — Added Score Delta Tracking (compare current vs previous scan results).
-- **setup** — Added Redesign Protocol for Tier 0 violation test failures (3-option escalation).
-
----
-
-## What's New in v6.1
-
-### Added
-- **code-autopsy** — 12Q quantified code review prompt (Code Autopsy v7.0). 12 analysis questions covering design through observability. 4-axis composite scoring (Security × 0.35 + Stability × 0.30 + Robustness × 0.20 + Operability × 0.15). Severity Anchor Table with weighted formula. Deployment verdict with CRITICAL hard cap. Factuality Gate (self-verify before reporting). Cross-file impact analysis. Quick mode and Diff mode. Backed by: Google eng-practices, Johnson et al. 2019, Parnas 1972. Works as a standalone prompt in any LLM — not Claude Code exclusive.
-
----
-
-## What's New in v6.0
-
-### Added
-- **goal-lock** — Agent discipline engine with PLAN→DO→VERIFY→FINALIZE→OUTPUT loop. Detects 11 success masquerading patterns (test deletion, mock wrapping, threshold relaxation, etc.). Quick mode (3 fields) for small changes, Full mode (7 fields) for everything else.
-
-### Merged
-- `harness-init` + `team-init` → **setup** — Infrastructure and agent team in one flow
-- `brief` + `adr` → **scope** — Scope definition with ADR capability built in
-- `retro` → **session-checkpoint** — Retrospection is now Phase 1.7 Reflexion inside session-checkpoint
-
-### Removed
-- `token-audit` — Use `npx ccusage` directly, or build a ccusage skill from the pattern
-- `adr` (standalone) — Absorbed into scope
-- `retro` (standalone) — Absorbed into session-checkpoint
-
-### Upgraded
-- All skills: Dominant Variable, Key Assumptions, Error Recovery, Safety Layers added
-- All skills: Scope Boundary with action tags ([READ]/[WRITE]/[BASH]/[AGENT])
-- `session-checkpoint`: Memento CoT compression, Reflexion, Invocation logging
-- `pre-push`: Large diff deterministic bundling, Discard If conditions
-- `collab-audit`: Anti-pattern flags, Key Assumptions
-
----
-
 ## Agentic Design Patterns Coverage
 
 These 12 skills implement 17 of the 25 known agentic design patterns ([Gulli 2026](https://books.google.com/books/about/Agentic_Design_Patterns.html?id=QqR20QEACAAJ), [Sairahul 2026](https://x.com/sairahul1/status/2069045570556383464)):
@@ -247,6 +196,10 @@ These 12 skills implement 17 of the 25 known agentic design patterns ([Gulli 202
 5. **Session continuity** — Start with handoff, end with checkpoint. Context survives across sessions
 
 ---
+
+## Changelog
+
+See [CHANGELOG.md](CHANGELOG.md) for the full version history (v3.0 → v6.3).
 
 ## License
 
