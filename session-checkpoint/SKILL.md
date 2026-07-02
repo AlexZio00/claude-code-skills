@@ -11,6 +11,14 @@ triggers:
 name: session-checkpoint
 description: "Use when saving session state before context compaction, switching tasks, or ending a session. Runs 5-phase pipeline: context extraction → handoff write → memory save → preservation check → compact guidance."
 user_invocable: true
+not_for:
+  - "No code changes and no pending decisions in session"
+  - "Simple handoff update only -> edit directly"
+see_also:
+  - skill: session-start
+    relation: "lifecycle pair — open/close"
+  - skill: setup
+    relation: "session-checkpoint=session end, setup=project start"
 ---
 
 # Session Checkpoint

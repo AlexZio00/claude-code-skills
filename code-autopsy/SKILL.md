@@ -1,3 +1,12 @@
+---
+name: code-autopsy
+user_invocable: true
+not_for:
+  - "Simple lint/type check only -> use lint tools directly"
+  - "Post-completion verification -> use verification agent"
+see_also:
+  []
+---
 🔬 CODE AUTOPSY v7.0
 "12 Questions + Quantified Severity + Deployment Verdict + 4-Axis Scoring"
 

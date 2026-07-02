@@ -8,6 +8,12 @@ name: project-check
 description: "Existing project health scan — audits Infrastructure, Security, Quality, and Harness setup. Read-only. Use when: '/project-check', 'project health check', 'project audit', 'what\\'s missing', 'analyze my project', 'check setup'. Ends with /project-init and /setup recommendations. NOT for new projects (use /project-init); project-check = shallow health scan."
 user_invocable: true
 tools: Read, Bash, Glob, Grep
+not_for:
+  - "New project setup -> setup skill"
+  - "Deep harness scoring -> check-harness"
+see_also:
+  - skill: setup
+    relation: "project-check=existing audit, setup=new project"
 ---
 
 # Project Check — Existing Project Health Scan

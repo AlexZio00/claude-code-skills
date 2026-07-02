@@ -10,6 +10,15 @@ description: |
   Trigger: '/scope', '/brief', '/specify', 'scope this', '스펙 잡아줘', '범위 잡아줘',
   'spec 만들어', '스펙 만들어', '기획 정리해줘', 'plan this'.
   Do NOT trigger for: bug fixes, single-file changes, existing spec, brainstorming.
+not_for:
+  - "Bug fix, single-file change -> implement directly"
+  - "Existing BRIEF.md/spec.md -> Edit directly"
+  - "Exploration only -> brainstorming agent"
+see_also:
+  - skill: goal-lock
+    relation: "scope=planning, goal-lock=execution"
+  - skill: freeze
+    relation: "scope=define boundaries, freeze=enforce boundaries"
 ---
 
 # /scope — Scope Definition Engine v1.0

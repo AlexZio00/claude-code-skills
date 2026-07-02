@@ -9,6 +9,12 @@ triggers:
 name: collab-audit
 description: "This skill should be used when the user types /collab-audit or requests AI collaboration diagnosis. Analyzes conversation history, artifacts, and work patterns to generate a 14-section AI Collaboration Audit. Behavioral analysis and feedback are bundled by design — separating them causes users to skip one, defeating the purpose. Saves to ~/.claude/collab-audits/YYYY-MM-DD.md. Compare mode: /collab-audit compare (diffs latest 2 audits). Triggers: '/collab-audit', '/collab-audit compare', 'AI 협업 진단해줘', '협업 진단', '행동 패턴 분석', '나 어떤 사람이야', 'AI collaboration audit', 'work pattern analysis', 'compare audits'. Requires minimum 2 sessions or 100+ messages. Do NOT use self-report surveys — observation-only."
 user_invocable: true
+not_for:
+  - "Single feedback -> direct conversation"
+  - "Skill audit -> forge --audit"
+see_also:
+  - skill: project-check
+    relation: "collab-audit=user collaboration patterns, project-check=project health"
 ---
 
 # /collab-audit — AI Collaboration Audit

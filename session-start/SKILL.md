@@ -11,6 +11,13 @@ name: session-start
 description: "Load handoff on session start, review lessons, output readiness signal. Triggers: '/session-start', 'start session'. Skip if: first session (no handoff), user requests 'start fresh', or standalone question unrelated to project context."
 user_invocable: true
 # (removed 2026-06-10) context: !cat — non-standard YAML tag, breaks parser. Handoff injection is handled by SessionStart hook
+not_for:
+  - "First session (no handoff exists) -> start directly"
+  - "One-off question -> answer directly"
+  - "User says 'start fresh' -> skip"
+see_also:
+  - skill: session-checkpoint
+    relation: "lifecycle pair — open/close"
 ---
 
 # Session Start

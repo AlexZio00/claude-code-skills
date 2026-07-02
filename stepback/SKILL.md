@@ -1,3 +1,13 @@
+---
+name: stepback
+user_invocable: true
+not_for:
+  - "Next action recommendation -> next-action skill"
+  - "Session start -> session-start"
+see_also:
+  - skill: scope
+    relation: "stepback=direction check, scope=boundary definition"
+---
 # /stepback — One-Shot Perspective Reset
 
 > Source: team-attention/hoyeon pattern. Read-only, zero side effects.

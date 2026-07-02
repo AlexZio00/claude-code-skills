@@ -2,6 +2,14 @@
 name: goal-lock
 description: "Agent Discipline Engine — lock the goal, run PLAN→DO→VERIFY→FINALIZE→OUTPUT loop, detect success masquerading. Triggers: '/goal-lock', '/goal-lock quick', 'goal lock', 'task harness'."
 user_invocable: true
+not_for:
+  - "Simple questions/conversation (no code changes)"
+  - "Single file 1-line fix"
+see_also:
+  - skill: scope
+    relation: "scope=planning lock, goal-lock=execution lock"
+  - skill: freeze
+    relation: "freeze=zone freeze, goal-lock=goal loop"
 ---
 
 # /goal-lock — Agent Discipline Engine v1.0

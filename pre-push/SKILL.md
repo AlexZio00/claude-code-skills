@@ -12,6 +12,11 @@ metadata:
   version: "3.2.0"
   author: "coinangel"
 user_invocable: true
+not_for:
+  - "Code review only -> code-reviewer agent"
+  - "Lint/type check only -> code-reviewer --quick"
+see_also:
+  []
 ---
 
 <!--

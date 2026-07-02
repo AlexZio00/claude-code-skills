@@ -15,6 +15,14 @@ triggers:
   - "나머지 건드리지 마"
   - "범위 잠가"
 user_invocable: true
+not_for:
+  - "Scope planning -> scope skill"
+  - "Execution loop -> goal-lock"
+see_also:
+  - skill: scope
+    relation: "freeze=zone lock, scope=planning scope"
+  - skill: goal-lock
+    relation: "freeze=manual lock, goal-lock=loop enforcement"
 ---
 
 # /freeze — Scope Lock

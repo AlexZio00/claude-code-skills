@@ -34,6 +34,9 @@ git/README history (the v6.0 rewrite dropped the changelog section from
   before the interview, instead of interviewing from a blank slate
 
 ### Added
+- All 12 skills: added `not_for` (misuse prevention) and `see_also`
+  (related skill cross-references) to YAML frontmatter — helps users
+  pick the right skill and discover related ones
 - Individual version tags on all 12 skills (previously only 2 of 12 had them)
 
 ---
